@@ -32,11 +32,11 @@ Discover:
 ## 🧠 Project Structure
 
 ```bash
-├──  landmark_recognition/                 # Flask API + ML models
+├──  landmark_recognition/              
 ├── digital_story_teller/ 
 ├── weather_prediction/
-├── recommendation/              # REST API endpoints
-├── frontend/                # React web app (mobile-responsive)
+├── recommendation/             
+├── frontend/                
 │   │   └── (Frontend application)
 ├── docs/
 │   ├── SRS_G17.pdf         # Software Requirements Specification
