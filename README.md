@@ -4,7 +4,7 @@
 
 Developed by **Group 17** —  
 👨‍🎓 [Jaleel Muhiyadeen](https://github.com/jaleel-muhiyadeen-206) | 👨‍🎓 [Kevin Herath](https://github.com/kevinHerath123/)  
-👩‍🎓 [Krishanthi Segar](https://github.com/your-gh) | 👩‍🎓 [Niveka Perera](https://github.com/your-gh)  
+👩‍🎓 [Krishanthi Segar](https://github.com/Krisanthi) | 👩‍🎓 [Niveka Perera](https://github.com/Niveka1998)  
 🎓 *BSc (Hons) Artificial Intelligence & Data Science — IIT in collaboration with RGU*  
 📅 November 2024 | 📄 [SRS](./docs/SRS_G17.pdf) | 📄 [Proposal](./docs/PP_Group_17_updated.pdf)
 
