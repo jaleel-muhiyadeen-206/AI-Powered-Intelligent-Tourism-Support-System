@@ -3,7 +3,7 @@
 > An intelligent web application that transforms how tourists explore Sri Lanka’s heritage — by identifying landmarks from photos, delivering AI-generated animated storytelling, predicting hyper-local weather, and recommending nearby attractions — all in one seamless experience.
 
 Developed by **Group 17** —  
-👨‍🎓 [Jaleel Muhiyadeen](https://github.com/your-gh) | 👨‍🎓 [Kevin Herath](https://github.com/your-gh)  
+👨‍🎓 [Jaleel Muhiyadeen](https://github.com/jaleel-muhiyadeen-206) | 👨‍🎓 [Kevin Herath](https://github.com/kevinHerath123/)  
 👩‍🎓 [Krishanthi Segar](https://github.com/your-gh) | 👩‍🎓 [Niveka Perera](https://github.com/your-gh)  
 🎓 *BSc (Hons) Artificial Intelligence & Data Science — IIT in collaboration with RGU*  
 📅 November 2024 | 📄 [SRS](./docs/SRS_G17.pdf) | 📄 [Proposal](./docs/PP_Group_17_updated.pdf)
