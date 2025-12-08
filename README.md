@@ -32,7 +32,7 @@ Discover:
 ## 🧠 Project Structure
 
 ```bash
-├──  landmark_cnn/                 # Flask API + ML models
+├──  landmark_recognition/                 # Flask API + ML models
 ├── digital_story_teller/ 
 ├── weather_prediction/
 ├── recommendation/              # REST API endpoints
@@ -41,5 +41,4 @@ Discover:
 ├── docs/
 │   ├── SRS_G17.pdf         # Software Requirements Specification
 │   └── PP_Group_17_updated.pdf
-|
 └── README.md
