@@ -26,3 +26,16 @@ def generate_narration(landmark, facts, significance):
 sigiriya_row = df.iloc[1]
 story = generate_narration(sigiriya_row['Landmark'], sigiriya_row['Facts'], sigiriya_row['Significance'])
 print(f"--- Story for {sigiriya_row['Landmark']} ---\n{story}")
+
+from rouge_score import rouge_scorer
+
+def evaluate_model(generated_text, reference_facts):
+    scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
+    # Join the 5 facts into one reference string
+    reference_text = " ".join(reference_facts)
+    scores = scorer.score(reference_text, generated_text)
+    return scores['rougeL'].fmeasure
+
+# Example evaluation
+score = evaluate_model(story, sigiriya_row['Facts'])
+print(f"Validation (ROUGE-L Accuracy): {score:.4f}")
