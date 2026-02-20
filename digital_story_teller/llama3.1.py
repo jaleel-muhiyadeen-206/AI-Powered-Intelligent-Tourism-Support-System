@@ -28,14 +28,35 @@ story = generate_narration(sigiriya_row['Landmark'], sigiriya_row['Facts'], sigi
 print(f"--- Story for {sigiriya_row['Landmark']} ---\n{story}")
 
 from rouge_score import rouge_scorer
+from bert_score import score as bert_score_calculation
+import torch
 
 def evaluate_model(generated_text, reference_facts):
-    scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
+    # 2. Calculate ROUGE Scores (1, 2, and L)
+    # ROUGE-1: Single word matching
+    # ROUGE-2: Two-word phrase matching
+    # ROUGE-L: Flow/Sentence structure matching
+    scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
     # Join the 5 facts into one reference string
     reference_text = " ".join(reference_facts)
-    scores = scorer.score(reference_text, generated_text)
-    return scores['rougeL'].fmeasure
+
+    rouge_results = scorer.score(reference_text, generated_text)
+
+    # 3. Calculate BERTScore (Meaning Matching)
+    P, R, F1 = bert_score_calculation([generated_text], [reference_text], lang="en", verbose=False)
+
+    # 4. Gather everything into a nice dictionary
+    results = {
+        "ROUGE-1": rouge_results['rouge1'].fmeasure,
+        "ROUGE-2": rouge_results['rouge2'].fmeasure,
+        "ROUGE-L": rouge_results['rougeL'].fmeasure,
+        "BERTScore": F1.item()  # .item() converts the math tensor to a simple number
+    }
+
+    return results
 
 # Example evaluation
-score = evaluate_model(story, sigiriya_row['Facts'])
-print(f"Validation (ROUGE-L Accuracy): {score:.4f}")
+final_scores = evaluate_model(story, sigiriya_row['Facts'])
+print("--- Evaluation Results ---")
+for metric, value in final_scores.items():
+    print(f"{metric}: {value:.4f}")
