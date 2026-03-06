@@ -97,10 +97,48 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 }
 .uber-btn-link:hover { opacity: 0.85; }
 
+/* Text input styles */
+.stTextInput > div > div > input {
+    background: #242424 !important; 
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    border-radius: 12px !important; 
+    color: #ffffff !important; 
+    font-size: 0.9rem !important;
+    transition: all 0.2s ease !important;
+    padding: 0.65rem 0.85rem !important;
+}
+.stTextInput > div > div > input:hover {
+    border-color: rgba(168,85,247,0.6) !important;
+    box-shadow: 0 0 0 3px rgba(168,85,247,0.15) !important;
+}
+.stTextInput > div > div > input:focus {
+    border-color: rgba(168,85,247,0.8) !important;
+    box-shadow: 0 0 0 3px rgba(168,85,247,0.2) !important;
+}
+
+/* Date input hover effect */
+.stDateInput > div > div {
+    transition: all 0.2s ease !important;
+}
+.stDateInput > div > div:hover {
+    border-color: rgba(168,85,247,0.6) !important;
+    box-shadow: 0 0 0 3px rgba(168,85,247,0.15) !important;
+    transition: all 0.2s ease !important;
+}
+/* Focus state too */
+.stDateInput > div > div:focus-within {
+    border-color: rgba(168,85,247,0.8) !important;
+    box-shadow: 0 0 0 3px rgba(168,85,247,0.2) !important;
+}
 /* Streamlit overrides */
 .stSelectbox > div > div {
     background: #242424 !important; border: 1px solid rgba(255,255,255,0.08) !important;
     border-radius: 12px !important; color: #ffffff !important;
+}
+.stSelectbox > div > div:hover {
+    border-color: rgba(168,85,247,0.6) !important;
+    box-shadow: 0 0 0 3px rgba(168,85,247,0.15) !important;
+    transition: all 0.2s ease !important;
 }
 .stDateInput > div > div > input {
     background: #242424 !important; border: 1px solid rgba(255,255,255,0.08) !important;
@@ -126,192 +164,266 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 </style>
 """, unsafe_allow_html=True)
 
-# ── LOCATION MAP ──────────────────────────────────────────────────
-LOCATION_MAP = {
-    "Adams Peak": "Rathnapura, Sabaragamuwa Province",
-    "Ancient City of Polonnaruwa": "Polonnaruwa, North Central Province",
-    "Beruwala Light House": "Beruwala, Western Province",
-    "British War Cemetery": "Kandy, Central Province",
-    "Bundala National Park": "Hambantota, Southern Province",
-    "Delft Island": "Jaffna, Northern Province",
-    "Dowa Rock Temple": "Bandarawela, Uva Province",
-    "Ganagaramaya Temple": "Colombo, Western Province",
-    "Henarathgoda Botanical Garden": "Gampaha, Western Province",
-    "Hortains Plain": "Nuwara Eliya, Central Province",
-    "Independance Square": "Colombo, Western Province",
-    "Jaya Sri Maha Bodhi": "Anuradhapura, North Central Province",
-    "Lotus Tower": "Colombo, Western Province",
-    "Maligawa Buddha Statue": "Kandy, Central Province",
-    "Nine Arches Bridge": "Ella, Uva Province",
-    "Pinnawala Elephant Orphanage": "Kegalle, Sabaragamuwa Province",
-    "Sigiriya": "Matale, Central Province",
-    "Sinharaja Forest": "Ratnapura, Sabaragamuwa Province",
-    "Sri Dalada Maligawa": "Kandy, Central Province",
-    "Star Fort": "Matara, Southern Province",
-    "Turtle Hatchery": "Kosgoda, Southern Province",
-    "Vavuniya Archaeological Museum": "Vavuniya, Northern Province",
-    "Wilapattu National Park": "Puttalam, North Western Province",
-    "Yapahuwa Rock Fortress": "Yapahuwa, North Western Province",
-}
 
-# ── DATA & MODEL LOADING ──────────────────────────────────────────
 @st.cache_data
 def load_data():
-    df = pd.read_csv('final_weather_location_tourism_ready.csv',
-                     usecols=['time','name','station_lat','station_lng',
-                              'temperature_2m_max','temperature_2m_min',
-                              'temperature_2m_mean','apparent_temperature_mean',
-                              'weathercode','precipitation_sum','rain_sum',
-                              'precipitation_hours','windspeed_10m_max',
-                              'sunrise','sunset','address','district',
-                              'keyword','location_lat','location_lng',
-                              'city_x','elevation_x','distance_km'])
-    df = df[df['name'].isin(list(LOCATION_MAP.keys()))].reset_index(drop=True)
+    df = pd.read_csv('weather_data_lightweight_smart.csv',
+                     usecols=['time', 'name', 'station_lat', 'station_lng',
+                              'temperature_2m_max', 'temperature_2m_min',
+                              'temperature_2m_mean', 'apparent_temperature_mean',
+                              'weathercode', 'precipitation_sum', 'rain_sum',
+                              'precipitation_hours', 'windspeed_10m_max',
+                              'sunrise', 'sunset', 'address', 'district',
+                              'keyword', 'location_lat', 'location_lng',
+                              'city_x', 'elevation_x', 'distance_km'])
     df['time'] = pd.to_datetime(df['time'])
     return df.sort_values('time').reset_index(drop=True)
+
+
+@st.cache_data
+def get_location_info(df):
+    """Extract unique locations with their details"""
+    location_info = df.groupby('name').agg({
+        'address': 'first',
+        'district': 'first',
+        'city_x': 'first'
+    }).reset_index()
+
+    # Create display name with address
+    location_info['display_name'] = location_info.apply(
+        lambda x: f"{x['name']} - {x['district']}, {x['city_x']}" if pd.notna(x['district']) else x['name'],
+        axis=1
+    )
+
+    return location_info
+
 
 @st.cache_resource
 def load_models():
     m = {
         'temperature_2m_mean': lgb.Booster(model_file='lightgbm_model_temperature_2m_mean.txt'),
-        'precipitation_sum':   lgb.Booster(model_file='lightgbm_model_precipitation_sum.txt'),
-        'windspeed_10m_max':   lgb.Booster(model_file='lightgbm_model_windspeed_10m_max.txt')
+        'precipitation_sum': lgb.Booster(model_file='lightgbm_model_precipitation_sum.txt'),
+        'windspeed_10m_max': lgb.Booster(model_file='lightgbm_model_windspeed_10m_max.txt')
     }
     return m, joblib.load('feature_columns.pkl')
 
+
 def create_features(df):
     d = df.copy()
-    d['hour']        = 12
-    d['day']         = d['time'].dt.day
-    d['month']       = d['time'].dt.month
-    d['year']        = d['time'].dt.year
+    d['hour'] = 12
+    d['day'] = d['time'].dt.day
+    d['month'] = d['time'].dt.month
+    d['year'] = d['time'].dt.year
     d['day_of_year'] = d['time'].dt.dayofyear
     d['day_of_week'] = d['time'].dt.dayofweek
-    d['is_weekend']  = d['day_of_week'].isin([5,6]).astype(int)
-    d['month_sin']   = np.sin(2*np.pi*d['month']/12)
-    d['month_cos']   = np.cos(2*np.pi*d['month']/12)
-    d['day_sin']     = np.sin(2*np.pi*d['day_of_year']/365)
-    d['day_cos']     = np.cos(2*np.pi*d['day_of_year']/365)
+    d['is_weekend'] = d['day_of_week'].isin([5, 6]).astype(int)
+    d['month_sin'] = np.sin(2 * np.pi * d['month'] / 12)
+    d['month_cos'] = np.cos(2 * np.pi * d['month'] / 12)
+    d['day_sin'] = np.sin(2 * np.pi * d['day_of_year'] / 365)
+    d['day_cos'] = np.cos(2 * np.pi * d['day_of_year'] / 365)
     le_d, le_k, le_c = LabelEncoder(), LabelEncoder(), LabelEncoder()
     d['district_encoded'] = le_d.fit_transform(d['district'].fillna('Unknown'))
-    d['keyword_encoded']  = le_k.fit_transform(d['keyword'].fillna('Unknown'))
-    d['city_encoded']     = le_c.fit_transform(d['city_x'].fillna('Unknown'))
-    d['temp_range']       = d['temperature_2m_max'] - d['temperature_2m_min']
-    d['apparent_diff']    = d['apparent_temperature_mean'] - d['temperature_2m_mean']
-    d['rain_intensity']   = d['rain_sum'] / (d['precipitation_hours']+1)
-    d = d.sort_values(['name','time'])
-    d['temp_lag_1']     = d.groupby('name')['temperature_2m_mean'].shift(1)
-    d['temp_lag_7']     = d.groupby('name')['temperature_2m_mean'].shift(7)
-    d['rain_lag_1']     = d.groupby('name')['rain_sum'].shift(1)
-    d['temp_rolling_3'] = d.groupby('name')['temperature_2m_mean'].transform(lambda x: x.rolling(3,min_periods=1).mean())
-    d['temp_rolling_7'] = d.groupby('name')['temperature_2m_mean'].transform(lambda x: x.rolling(7,min_periods=1).mean())
-    d['wind_lag_1']     = d.groupby('name')['windspeed_10m_max'].shift(1)
-    d['wind_lag_7']     = d.groupby('name')['windspeed_10m_max'].shift(7)
-    d['wind_rolling_3'] = d.groupby('name')['windspeed_10m_max'].transform(lambda x: x.rolling(3,min_periods=1).mean())
-    d['wind_rolling_7'] = d.groupby('name')['windspeed_10m_max'].transform(lambda x: x.rolling(7,min_periods=1).mean())
-    d['wind_log']       = np.log1p(d['windspeed_10m_max'])
+    d['keyword_encoded'] = le_k.fit_transform(d['keyword'].fillna('Unknown'))
+    d['city_encoded'] = le_c.fit_transform(d['city_x'].fillna('Unknown'))
+    d['temp_range'] = d['temperature_2m_max'] - d['temperature_2m_min']
+    d['apparent_diff'] = d['apparent_temperature_mean'] - d['temperature_2m_mean']
+    d['rain_intensity'] = d['rain_sum'] / (d['precipitation_hours'] + 1)
+    d = d.sort_values(['name', 'time'])
+    d['temp_lag_1'] = d.groupby('name')['temperature_2m_mean'].shift(1)
+    d['temp_lag_7'] = d.groupby('name')['temperature_2m_mean'].shift(7)
+    d['rain_lag_1'] = d.groupby('name')['rain_sum'].shift(1)
+    d['temp_rolling_3'] = d.groupby('name')['temperature_2m_mean'].transform(
+        lambda x: x.rolling(3, min_periods=1).mean())
+    d['temp_rolling_7'] = d.groupby('name')['temperature_2m_mean'].transform(
+        lambda x: x.rolling(7, min_periods=1).mean())
+    d['wind_lag_1'] = d.groupby('name')['windspeed_10m_max'].shift(1)
+    d['wind_lag_7'] = d.groupby('name')['windspeed_10m_max'].shift(7)
+    d['wind_rolling_3'] = d.groupby('name')['windspeed_10m_max'].transform(lambda x: x.rolling(3, min_periods=1).mean())
+    d['wind_rolling_7'] = d.groupby('name')['windspeed_10m_max'].transform(lambda x: x.rolling(7, min_periods=1).mean())
+    d['wind_log'] = np.log1p(d['windspeed_10m_max'])
     nc = d.select_dtypes(include='number').columns
     d[nc] = d[nc].bfill().ffill()
     return d, le_d, le_k, le_c
 
+
 def predict_weather(location_name, target_date, df_enhanced, models, feature_cols):
-    td   = pd.to_datetime(target_date)
-    loc  = df_enhanced[df_enhanced['name'] == location_name]
+    td = pd.to_datetime(target_date)
+    loc = df_enhanced[df_enhanced['name'] == location_name]
     if len(loc) == 0: return None
-    lat  = loc.sort_values('time').iloc[-1:].copy()
+    lat = loc.sort_values('time').iloc[-1:].copy()
     feat = {col: (lat[col].values[0] if col in lat.columns else 0) for col in feature_cols}
-    feat.update({'day':td.day,'month':td.month,'year':td.year,'day_of_year':td.dayofyear,
-                 'day_of_week':td.dayofweek,'is_weekend':1 if td.dayofweek>=5 else 0,
-                 'month_sin':np.sin(2*np.pi*td.month/12),'month_cos':np.cos(2*np.pi*td.month/12),
-                 'day_sin':np.sin(2*np.pi*td.dayofyear/365),'day_cos':np.cos(2*np.pi*td.dayofyear/365),'hour':12})
+    feat.update({'day': td.day, 'month': td.month, 'year': td.year, 'day_of_year': td.dayofyear,
+                 'day_of_week': td.dayofweek, 'is_weekend': 1 if td.dayofweek >= 5 else 0,
+                 'month_sin': np.sin(2 * np.pi * td.month / 12), 'month_cos': np.cos(2 * np.pi * td.month / 12),
+                 'day_sin': np.sin(2 * np.pi * td.dayofyear / 365), 'day_cos': np.cos(2 * np.pi * td.dayofyear / 365),
+                 'hour': 12})
     pdf = pd.DataFrame([feat])
     out = {}
     for t, m in models.items():
         p = m.predict(pdf[feature_cols], num_iteration=m.best_iteration)[0]
-        out[t] = round(np.expm1(p) if t=='windspeed_10m_max' else p, 2)
+        # FIXED: NO expm1 transformation - model outputs correct values
+        out[t] = round(p, 2)
     return out
+
 
 def score_weather(temp, rain, wind):
     s = 0
-    if 24<=temp<=30: s+=40
-    elif 22<=temp<24 or 30<temp<=33: s+=33
-    elif 20<=temp<22 or 33<temp<=36: s+=22
-    else: s+=10
-    if rain==0: s+=35
-    elif rain<5: s+=30
-    elif rain<15: s+=22
-    elif rain<30: s+=14
-    elif rain<50: s+=7
-    if wind<10: s+=25
-    elif wind<20: s+=20
-    elif wind<30: s+=13
-    elif wind<45: s+=6
+    if 24 <= temp <= 30:
+        s += 40
+    elif 22 <= temp < 24 or 30 < temp <= 33:
+        s += 33
+    elif 20 <= temp < 22 or 33 < temp <= 36:
+        s += 22
+    else:
+        s += 10
+    if rain == 0:
+        s += 35
+    elif rain < 5:
+        s += 30
+    elif rain < 15:
+        s += 22
+    elif rain < 30:
+        s += 14
+    elif rain < 50:
+        s += 7
+    if wind < 10:
+        s += 25
+    elif wind < 20:
+        s += 20
+    elif wind < 30:
+        s += 13
+    elif wind < 45:
+        s += 6
     return s
 
+
 def get_suggestion(score):
-    if score>=70: return "good","✓","Ideal weather for exploring heritage sites!"
-    elif score>=50: return "warn","!","Fair conditions. Carry an umbrella just in case."
-    else: return "bad","✕","Poor weather. Consider rescheduling your visit."
+    if score >= 70:
+        return "good", "✓", "Ideal weather for exploring heritage sites!"
+    elif score >= 50:
+        return "warn", "!", "Fair conditions. Carry an umbrella just in case."
+    else:
+        return "bad", "✕", "Poor weather. Consider rescheduling your visit."
+
 
 def get_season(month):
-    if month in [12,1,2]:   return "❄️","Northeast Monsoon","Cool and dry in most areas. Northeast coast may experience rain."
-    elif month in [3,4]:    return "🌤","First Inter-Monsoon","Hot and humid island-wide. Afternoon thundershowers are common."
-    elif month in [5,6,7,8,9]: return "🌧","Southwest Monsoon","Heavy rain on west & south coasts. Dry in the north and east."
-    else:                   return "🌦","Second Inter-Monsoon","Rainfall island-wide. Both coasts can experience showers."
+    if month in [12, 1, 2]:
+        return "❄️", "Northeast Monsoon", "Cool and dry in most areas. Northeast coast may experience rain."
+    elif month in [3, 4]:
+        return "🌤", "First Inter-Monsoon", "Hot and humid island-wide. Afternoon thundershowers are common."
+    elif month in [5, 6, 7, 8, 9]:
+        return "🌧", "Southwest Monsoon", "Heavy rain on west & south coasts. Dry in the north and east."
+    else:
+        return "🌦", "Second Inter-Monsoon", "Rainfall island-wide. Both coasts can experience showers."
 
-# ── LOAD ──────────────────────────────────────────────────────────
+
+# Load data
 with st.spinner("Loading..."):
-    df                           = load_data()
-    models, feature_cols         = load_models()
-    df_enh, le_d, le_k, le_c    = create_features(df)
+    df = load_data()
+    location_info = get_location_info(df)
+    models, feature_cols = load_models()
+    df_enh, le_d, le_k, le_c = create_features(df)
 
-# ── HEADER ────────────────────────────────────────────────────────
 st.markdown("""
 <div class="page-title">⛅ Smart Weather Prediction</div>
 <div class="page-subtitle">Plan your perfect heritage site visit</div>
 """, unsafe_allow_html=True)
 
-# ── INPUT CARD ────────────────────────────────────────────────────
-st.markdown('<div class="main-card">', unsafe_allow_html=True)
+# Show total locations count
+st.markdown(
+    f'<div style="font-size:0.7rem;color:rgba(255,255,255,0.25);margin-bottom:10px;">📊 {len(location_info)} locations available</div>',
+    unsafe_allow_html=True)
 
-st.markdown('<div class="input-label">Select landmark</div>', unsafe_allow_html=True)
-landmark = st.selectbox("", options=list(LOCATION_MAP.keys()), label_visibility="collapsed")
-st.markdown(f'<div style="font-size:0.72rem;color:rgba(255,255,255,0.28);margin:4px 0 14px;">📍 {LOCATION_MAP[landmark]}</div>', unsafe_allow_html=True)
+# SEARCHABLE LOCATION INPUT
+st.markdown('<div class="input-label">🔍 Search locations</div>', unsafe_allow_html=True)
+
+# User can type to search
+user_input = st.text_input("",
+                           placeholder="Type to search (e.g., Sigiriya, Colombo, Kandy)...",
+                           label_visibility="collapsed",
+                           key="location_search")
+
+# Filter locations based on search
+if user_input:
+    # Search in both name and address
+    filtered_locations = location_info[
+        location_info['name'].str.lower().str.contains(user_input.lower(), na=False) |
+        location_info['display_name'].str.lower().str.contains(user_input.lower(), na=False)
+        ]
+
+    if len(filtered_locations) > 0:
+        st.markdown(
+            f'<div style="font-size:0.7rem;color:rgba(255,255,255,0.35);margin:8px 0 4px;">💡 Found {len(filtered_locations)} matching location(s):</div>',
+            unsafe_allow_html=True)
+
+        # Show dropdown with filtered results
+        selected_location = st.selectbox(
+            "",
+            options=filtered_locations['name'].tolist(),
+            format_func=lambda x: location_info[location_info['name'] == x]['display_name'].values[0],
+            label_visibility="collapsed",
+            key="filtered_dropdown"
+        )
+        landmark = selected_location
+
+        # Show location details
+        loc_details = location_info[location_info['name'] == landmark].iloc[0]
+        st.markdown(
+            f'<div style="font-size:0.72rem;color:rgba(255,255,255,0.28);margin:4px 0 14px;">📍 {loc_details["address"]}</div>',
+            unsafe_allow_html=True)
+    else:
+        st.warning(f"No locations found matching '{user_input}'. Try a different search term.")
+        landmark = None
+else:
+    # Default: show all locations
+    st.markdown(
+        '<div style="font-size:0.7rem;color:rgba(255,255,255,0.35);margin:8px 0 4px;">💡 All available locations:</div>',
+        unsafe_allow_html=True)
+
+    landmark = st.selectbox(
+        "",
+        options=location_info['name'].tolist(),
+        format_func=lambda x: location_info[location_info['name'] == x]['display_name'].values[0],
+        label_visibility="collapsed",
+        key="all_dropdown"
+    )
+
+    # Show location details
+    loc_details = location_info[location_info['name'] == landmark].iloc[0]
+    st.markdown(
+        f'<div style="font-size:0.72rem;color:rgba(255,255,255,0.28);margin:4px 0 14px;">📍 {loc_details["address"]}</div>',
+        unsafe_allow_html=True)
 
 col_date, col_btn = st.columns([3, 1])
 with col_date:
     st.markdown('<div class="input-label">Select your visit date</div>', unsafe_allow_html=True)
     selected_date = st.date_input("",
-                                   value=date.today() + timedelta(days=1),
-                                   min_value=date.today(),
-                                   max_value=date.today() + timedelta(days=365*4),
-                                   label_visibility="collapsed",
-                                   format="DD/MM/YYYY")
+                                  value=date.today() + timedelta(days=1),
+                                  min_value=date.today(),
+                                  max_value=date.today() + timedelta(days=365 * 4),
+                                  label_visibility="collapsed",
+                                  format="DD/MM/YYYY")
 with col_btn:
     st.markdown('<div class="input-label">&nbsp;</div>', unsafe_allow_html=True)
     predict_btn = st.button("🔍 Predict Weather")
 
-st.markdown('</div>', unsafe_allow_html=True)
-
-# ── RESULTS ───────────────────────────────────────────────────────
-if predict_btn:
+if predict_btn and landmark:
     with st.spinner("Predicting..."):
         pred = predict_weather(landmark, selected_date, df_enh, models, feature_cols)
 
     if pred:
-        temp  = pred['temperature_2m_mean']
-        rain  = pred['precipitation_sum']
-        wind  = pred['windspeed_10m_max']
-        sc    = score_weather(temp, rain, wind)
+        temp = pred['temperature_2m_mean']
+        rain = pred['precipitation_sum']
+        wind = pred['windspeed_10m_max']
+        sc = score_weather(temp, rain, wind)
         stype, sicon, stext = get_suggestion(sc)
         s_ico, s_nm, s_desc = get_season(selected_date.month)
 
-        rain_pct   = min(99, round(rain * 3))
-        temp_range = f"{round(temp-1.5,1)}–{round(temp+1.5,1)}"
-        wind_range = f"{max(0,round(wind-3))}–{round(wind+3)}"
+        rain_pct = min(99, round(rain * 3))
+        temp_range = f"{round(temp - 1.5, 1)}–{round(temp + 1.5, 1)}"
+        wind_range = f"{max(0, round(wind - 3))}–{round(wind + 3)}"
 
         # Metric tiles
-        st.markdown('<div class="main-card">', unsafe_allow_html=True)
         st.markdown(f"""
         <div class="metric-grid">
             <div class="metric-tile">
@@ -324,7 +436,7 @@ if predict_btn:
                 <div class="icon">💧</div>
                 <div class="val">{rain_pct}<span class="unit">%</span></div>
                 <div class="lbl">Precipitation</div>
-                <div class="range-text">{round(rain,1)} mm</div>
+                <div class="range-text">{round(rain, 1)} mm</div>
             </div>
             <div class="metric-tile">
                 <div class="icon">🌬️</div>
@@ -338,7 +450,7 @@ if predict_btn:
                 <div class="lbl">Weather Score</div>
             </div>
         </div>
-        <div class="suggestion-banner{'  suggestion-bad' if stype=='bad' else ' suggestion-warn' if stype=='warn' else ''}">
+        <div class="suggestion-banner{'  suggestion-bad' if stype == 'bad' else ' suggestion-warn' if stype == 'warn' else ''}">
             <div class="check">{sicon}</div>
             <div><strong>Smart Travel Suggestion:</strong> {stext}</div>
         </div>
@@ -372,4 +484,4 @@ if predict_btn:
         """, unsafe_allow_html=True)
 
     else:
-        st.error(f"No weather data found for **{landmark}**.")
+        st.error(f"⚠️ No weather data found for **{landmark}**.")
