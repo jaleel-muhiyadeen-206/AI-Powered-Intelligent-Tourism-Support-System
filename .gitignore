@@ -12,3 +12,4 @@ output/trained_models/
 data/user_likes.csv
 data/user_reviews.csv
 data/user_ratings.csv
+.idea/
