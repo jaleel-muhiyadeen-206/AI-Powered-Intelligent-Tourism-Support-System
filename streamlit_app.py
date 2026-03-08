@@ -4,9 +4,9 @@ Streamlit Application: Toura.lk
 AI-driven smart tourism recommendation system for Sri Lanka.
 
 Models:
-    Model 1: You May Also Like (SBERT + GNN + LambdaMART)
-    Model 2: Popular Places Nearby (BERT + Kaggle + LambdaMART)
-    Model 3: Nearby Essentials (BERT + per-type LambdaMART)
+    Model1: You May Also Like (SBERT + GNN + LambdaMART)
+    Model2: Popular Places Nearby (BERT + Kaggle + LambdaMART)
+    Model3: Nearby Essentials (BERT + per-type LambdaMART)
 
 User Interactions:
     - Likes: stored in data/user_likes.csv, boost liked places in ranking
