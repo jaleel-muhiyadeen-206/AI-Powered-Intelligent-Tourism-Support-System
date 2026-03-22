@@ -174,7 +174,7 @@ class Model3_NearbyEssentials:
             imp = self.lambdamart[st].feature_importance(importance_type='gain')
             names = ['sentiment', 'proximity', 'rating', 'budget', 'distance_raw']
             total = max(sum(imp), 1)
-            print("    Feature importance:")
+            print("    Feature importance (ranking priorities):")
             for n, v in zip(names, imp):
                 print(f"      {n}: {v / total * 100:.1f}%")
 
@@ -208,29 +208,18 @@ class Model3_NearbyEssentials:
             return pd.DataFrame()
 
         svc_coords = np.radians(svc[['service_latitude', 'service_longitude']].values)
+        n_neighbors = min(50, len(svc))
         knn = NearestNeighbors(
-            n_neighbors=min(20, len(svc)), metric='haversine', algorithm='ball_tree'
+            n_neighbors=n_neighbors, metric='haversine', algorithm='ball_tree'
         )
         knn.fit(svc_coords)
 
         q = np.radians([[cur['latitude'], cur['longitude']]])
-        dists, idxs = knn.kneighbors(q, n_neighbors=min(20, len(svc)))
-
-        nearest_km = dists[0][0] * 6371
-        fallback_used = False
-        if nearest_km > max_distance_km:
-            p_dists, p_idxs = self.place_knn.kneighbors(q, n_neighbors=5)
-            for pi in p_idxs[0]:
-                fb = self.places.iloc[pi]
-                fb_q = np.radians([[fb['latitude'], fb['longitude']]])
-                fb_dists, fb_idxs = knn.kneighbors(fb_q, n_neighbors=min(20, len(svc)))
-                if fb_dists[0][0] * 6371 <= max_distance_km:
-                    dists, idxs = fb_dists, fb_idxs
-                    fallback_used = True
-                    break
+        dists, idxs = knn.kneighbors(q, n_neighbors=n_neighbors)
 
         model = self.lambdamart.get(service_type)
         candidates = []
+        effective_max = max_distance_km
 
         for d_rad, si in zip(dists[0], idxs[0]):
             s = svc.iloc[si]
@@ -238,7 +227,7 @@ class Model3_NearbyEssentials:
                 cur['latitude'], cur['longitude'],
                 s['service_latitude'], s['service_longitude']
             )
-            if d_km > max_distance_km * (2 if fallback_used else 1):
+            if d_km > effective_max:
                 continue
 
             sent = max(0, s.get('service_sentiment', 0.0))
@@ -266,6 +255,94 @@ class Model3_NearbyEssentials:
                 'rating_score': round(rating, 3), 'budget_score': round(budget, 3),
                 'final_score': round(score, 3),
             })
+
+        # If fewer than top_n candidates within max_distance, expand search radius
+        if len(candidates) < top_n:
+            for d_rad, si in zip(dists[0], idxs[0]):
+                s = svc.iloc[si]
+                d_km = haversine_distance(
+                    cur['latitude'], cur['longitude'],
+                    s['service_latitude'], s['service_longitude']
+                )
+                if d_km <= effective_max:
+                    continue  # already added
+
+                sent = max(0, s.get('service_sentiment', 0.0))
+                prox = 1.0 / (1.0 + d_km / 3.0)
+                rating = s.get('service_avg_rating', 3.0) / 5.0
+                budget = s.get('budget_score', 0.5)
+
+                if model:
+                    feat = np.array([[sent, prox, rating, budget, d_km]])
+                    score = float(model.predict(feat)[0])
+                else:
+                    score = prox * 0.5 + rating * 0.3 + sent * 0.1 + (1 - budget / 5.0) * 0.1
+
+                review = s.get('service_display_review', '')
+                if pd.isna(review) or not str(review).strip():
+                    review = DEFAULT_SERVICE_REVIEW
+
+                candidates.append({
+                    'name': s.get('service_name', 'Unknown'),
+                    'image': s.get('service_image_url', ''),
+                    'rating': round(s.get('service_avg_rating', 0), 1),
+                    'distance_km': round(d_km, 2), 'review': str(review)[:200],
+                    'budget': s.get('service_budget_lkr', 'N/A'),
+                    'sentiment_score': round(sent, 3), 'proximity_score': round(prox, 3),
+                    'rating_score': round(rating, 3), 'budget_score': round(budget, 3),
+                    'final_score': round(score, 3),
+                })
+                if len(candidates) >= top_n:
+                    break
+
+        # If still fewer than top_n, try fallback to nearest place with services
+        if len(candidates) < top_n:
+            p_dists, p_idxs = self.place_knn.kneighbors(q, n_neighbors=5)
+            for pi in p_idxs[0]:
+                fb = self.places.iloc[pi]
+                if fb['place_id'] == place_id:
+                    continue
+                fb_q = np.radians([[fb['latitude'], fb['longitude']]])
+                fb_dists, fb_idxs = knn.kneighbors(fb_q, n_neighbors=n_neighbors)
+                for fd_rad, fsi in zip(fb_dists[0], fb_idxs[0]):
+                    s = svc.iloc[fsi]
+                    d_km = haversine_distance(
+                        cur['latitude'], cur['longitude'],
+                        s['service_latitude'], s['service_longitude']
+                    )
+                    sname = s.get('service_name', 'Unknown')
+                    if any(c['name'] == sname for c in candidates):
+                        continue
+
+                    sent = max(0, s.get('service_sentiment', 0.0))
+                    prox = 1.0 / (1.0 + d_km / 3.0)
+                    rating = s.get('service_avg_rating', 3.0) / 5.0
+                    budget = s.get('budget_score', 0.5)
+
+                    if model:
+                        feat = np.array([[sent, prox, rating, budget, d_km]])
+                        score = float(model.predict(feat)[0])
+                    else:
+                        score = prox * 0.5 + rating * 0.3 + sent * 0.1 + (1 - budget / 5.0) * 0.1
+
+                    review = s.get('service_display_review', '')
+                    if pd.isna(review) or not str(review).strip():
+                        review = DEFAULT_SERVICE_REVIEW
+
+                    candidates.append({
+                        'name': sname,
+                        'image': s.get('service_image_url', ''),
+                        'rating': round(s.get('service_avg_rating', 0), 1),
+                        'distance_km': round(d_km, 2), 'review': str(review)[:200],
+                        'budget': s.get('service_budget_lkr', 'N/A'),
+                        'sentiment_score': round(sent, 3), 'proximity_score': round(prox, 3),
+                        'rating_score': round(rating, 3), 'budget_score': round(budget, 3),
+                        'final_score': round(score, 3),
+                    })
+                    if len(candidates) >= top_n:
+                        break
+                if len(candidates) >= top_n:
+                    break
 
         candidates.sort(key=lambda x: x['final_score'], reverse=True)
         seen = set()
