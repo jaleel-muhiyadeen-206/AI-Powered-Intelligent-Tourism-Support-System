@@ -469,19 +469,24 @@ if predict_btn and landmark:
         """, unsafe_allow_html=True)
 
         # Uber
+        loc_details = location_info[location_info['name'] == landmark].iloc[0]
+        loc_data = df[df['name'] == landmark].iloc[0]
+
+        uber_link = f"https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]={loc_data['location_lat']}&dropoff[longitude]={loc_data['location_lng']}&dropoff[nickname]={landmark.replace(' ', '%20')}"
+
         st.markdown(f"""
-        <div class="uber-card">
-            <div class="uber-left">
-                <div class="uber-globe">🌐</div>
-                <div>
-                    <div class="uber-title">Ready to visit?</div>
-                    <div class="uber-sub">Book a ride directly to {landmark}</div>
+                <div class="uber-card">
+                    <div class="uber-left">
+                        <div class="uber-globe">🌐</div>
+                        <div>
+                            <div class="uber-title">Ready to visit?</div>
+                            <div class="uber-sub">Book a ride directly to {landmark}</div>
+                        </div>
+                    </div>
+                    <a href="{uber_link}"
+                       target="_blank" class="uber-btn-link">🚗 Connect with Uber</a>
                 </div>
-            </div>
-            <a href="https://m.uber.com/ul/?action=setPickup&pickup=my_location"
-               target="_blank" class="uber-btn-link">🚗 Connect with Uber</a>
-        </div>
-        """, unsafe_allow_html=True)
+                """, unsafe_allow_html=True)
 
     else:
         st.error(f"⚠️ No weather data found for **{landmark}**.")
