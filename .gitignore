@@ -1,15 +1,1 @@
-.venv/
-__pycache__/
-*.pyc
-.DS_Store
-.env
-models/bert_sentiment/
-models/bert_cache/
-models/sbert_local/
-models/sbert_cache/
-output/preprocessed/
-output/trained_models/
-data/user_likes.csv
-data/user_reviews.csv
-data/user_ratings.csv
-.idea/
+weather_app.py
