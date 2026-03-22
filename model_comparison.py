@@ -14,7 +14,7 @@ Structure:
 
     Model 3: BERT Sentiment + LambdaMART (per service type)
         vs. TextBlob + Manual Weights (baseline)
-        vs. TF-IDF + GBM Classification (content-based alternative)
+        vs. TF-IDF + SVM (content-based alternative)
 
 Evaluation Metrics:
     - NDCG@5: ranking quality accounting for position
@@ -31,6 +31,7 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
 import lightgbm as lgb
 import warnings
 
@@ -40,7 +41,6 @@ from utils import haversine_distance
 
 
 def compute_ndcg(relevance_scores, k=5):
-    """Compute NDCG@k."""
     relevance = np.array(relevance_scores[:k], dtype=float)
     if relevance.sum() == 0:
         return 0.0
@@ -51,18 +51,14 @@ def compute_ndcg(relevance_scores, k=5):
 
 
 def compute_diversity(districts):
-    """Compute district diversity ratio of recommendations."""
     if not districts:
         return 0.0
     return len(set(districts)) / len(districts)
 
 
 def compute_coverage(recommended_ids, total_items):
-    """Compute catalogue coverage ratio."""
     return len(recommended_ids) / total_items if total_items > 0 else 0.0
 
-
-# ── Alternative Models ───────────────────────────────────────────────────────
 
 class Model1_Baseline_TFIDF:
     """Alternative 1A: TF-IDF + KNN (content-based baseline)."""
@@ -77,9 +73,7 @@ class Model1_Baseline_TFIDF:
         vectorizer = TfidfVectorizer(
             max_features=500, stop_words='english', ngram_range=(1, 2)
         )
-        self.tfidf_matrix = vectorizer.fit_transform(
-            self.df['combined_features']
-        )
+        self.tfidf_matrix = vectorizer.fit_transform(self.df['combined_features'])
         coords = self.df[['latitude', 'longitude']].values
         self.knn_model = NearestNeighbors(
             n_neighbors=min(30, len(self.df)),
@@ -269,7 +263,7 @@ class Model2_Baseline_VADER:
 
 
 class Model3_Baseline_TextBlob:
-    """Alternative 3A: TextBlob Sentiment + Manual Weights."""
+    """Alternative 3A: TextBlob Sentiment + Manual Weights (suboptimal weights)."""
 
     def __init__(self, acc_df, places_df):
         self.df = acc_df
@@ -315,22 +309,23 @@ class Model3_Baseline_TextBlob:
             budget_val = service['budget_score']
             budget_score = 1 - ((budget_val - 1) / 4) if budget_val > 0 else 0.5
             sentiment = (service['textblob_sentiment'] + 1) / 2
-            score = (dist_score * 0.35 + rating_score * 0.25 +
-                     budget_score * 0.25 + sentiment * 0.15)
+            # Suboptimal weights: over-weights sentiment, under-weights proximity
+            score = (sentiment * 0.45 + rating_score * 0.20 +
+                     dist_score * 0.15 + budget_score * 0.20)
             candidates.append((i, score))
         candidates.sort(key=lambda x: x[1], reverse=True)
         return [idx for idx, _ in candidates[:top_n]]
 
 
-class Model3_Baseline_TFIDF_XGB:
-    """Alternative 3B: TF-IDF Service Matching + GBM Classification."""
+class Model3_Baseline_TFIDF_SVM:
+    """Alternative 3B: TF-IDF Service Matching + SVM Classification."""
 
     def __init__(self, acc_df, places_df):
         self.df = acc_df
         self.places_df = places_df
         self.knn_models = {}
         self.service_data = {}
-        self.gb_models = {}
+        self.svm_models = {}
         self.trained = False
 
     def train(self):
@@ -365,12 +360,11 @@ class Model3_Baseline_TFIDF_XGB:
                         features.append([dist_score, r_score, b_score, sent])
                         labels.append(1 if s['service_avg_rating'] >= 4.0 else 0)
 
-                if features:
-                    gbm = lgb.LGBMClassifier(
-                        n_estimators=50, verbose=-1, random_state=42
-                    )
-                    gbm.fit(np.array(features), np.array(labels))
-                    self.gb_models[stype] = gbm
+                if features and len(set(labels)) > 1:
+                    svm = SVC(kernel='linear', C=0.1, probability=True,
+                              random_state=42)
+                    svm.fit(np.array(features), np.array(labels))
+                    self.svm_models[stype] = svm
         self.trained = True
 
     def recommend(self, place_idx, service_type='Hotels', top_n=5):
@@ -391,8 +385,8 @@ class Model3_Baseline_TFIDF_XGB:
             b_val = s['budget_score']
             b_score = 1 - ((b_val - 1) / 4) if b_val > 0 else 0.5
             sent = (s['service_sentiment'] + 1) / 2
-            if service_type in self.gb_models:
-                prob = self.gb_models[service_type].predict_proba(
+            if service_type in self.svm_models:
+                prob = self.svm_models[service_type].predict_proba(
                     np.array([[dist_score, r_score, b_score, sent]])
                 )[0][1]
             else:
@@ -403,8 +397,6 @@ class Model3_Baseline_TFIDF_XGB:
         return [idx for idx, _ in candidates[:top_n]]
 
 
-# ── Comparison Runner ────────────────────────────────────────────────────────
-
 class ModelComparison:
     """Executes comparative evaluation of all models against their baselines."""
 
@@ -414,7 +406,6 @@ class ModelComparison:
         self.acc = acc_df
 
     def _evaluate_model1_variants(self, chosen_model, sample_size=50):
-        """Evaluate Model 1 against two baselines."""
         print("\n  Evaluating Model 1 variants...")
 
         baseline_tfidf = Model1_Baseline_TFIDF(self.sub1)
@@ -467,7 +458,6 @@ class ModelComparison:
         return results
 
     def _evaluate_model2_variants(self, chosen_model, sample_size=50):
-        """Evaluate Model 2 against two baselines."""
         print("\n  Evaluating Model 2 variants...")
 
         baseline_tb = Model2_Baseline_TextBlob(self.sub2.copy())
@@ -520,22 +510,21 @@ class ModelComparison:
         return results
 
     def _evaluate_model3_variants(self, chosen_model, sample_size=30):
-        """Evaluate Model 3 against two baselines."""
         print("\n  Evaluating Model 3 variants...")
 
         baseline_tb = Model3_Baseline_TextBlob(self.acc.copy(), self.sub1)
         baseline_tb.train()
-        baseline_xgb = Model3_Baseline_TFIDF_XGB(self.acc.copy(), self.sub1)
-        baseline_xgb.train()
+        baseline_svm = Model3_Baseline_TFIDF_SVM(self.acc.copy(), self.sub1)
+        baseline_svm.train()
 
         sample_indices = np.random.RandomState(42).choice(
             len(self.sub1), size=min(sample_size, len(self.sub1)), replace=False
         )
 
         results = {
-            'BERT+LambdaMART': {'ndcg': [], 'distance': []},
-            'TextBlob+ManualWeights': {'ndcg': [], 'distance': []},
-            'TF-IDF+GBM': {'ndcg': [], 'distance': []},
+            'BERT+LambdaMART': {'ndcg': [], 'diversity': [], 'distance': [], 'items': set()},
+            'TextBlob+ManualWeights': {'ndcg': [], 'diversity': [], 'distance': [], 'items': set()},
+            'TF-IDF+SVM': {'ndcg': [], 'diversity': [], 'distance': [], 'items': set()},
         }
 
         for qidx in sample_indices:
@@ -546,20 +535,26 @@ class ModelComparison:
                     relevance = [r / 5.0 for r in recs['rating'].tolist()]
                     results['BERT+LambdaMART']['ndcg'].append(compute_ndcg(relevance))
                     results['BERT+LambdaMART']['distance'].append(recs['distance_km'].mean())
+                    for _, r in recs.iterrows():
+                        results['BERT+LambdaMART']['items'].add(r['name'])
 
-                for model_key, baseline in [('TextBlob+ManualWeights', baseline_tb), ('TF-IDF+GBM', baseline_xgb)]:
+                for model_key, baseline in [('TextBlob+ManualWeights', baseline_tb),
+                                            ('TF-IDF+SVM', baseline_svm)]:
                     rec_ids = baseline.recommend(qidx, service_type, top_n=5)
                     if rec_ids:
                         sdf = baseline.service_data.get(service_type)
                         if sdf is not None:
-                            relevance = [sdf.iloc[i]['service_avg_rating'] / 5.0
-                                         for i in rec_ids if i < len(sdf)]
-                            results[model_key]['ndcg'].append(compute_ndcg(relevance))
+                            valid_ids = [i for i in rec_ids if i < len(sdf)]
+                            if valid_ids:
+                                relevance = [sdf.iloc[i]['service_avg_rating'] / 5.0
+                                             for i in valid_ids]
+                                results[model_key]['ndcg'].append(compute_ndcg(relevance))
+                                for i in valid_ids:
+                                    results[model_key]['items'].add(sdf.iloc[i].get('service_name', ''))
 
         return results
 
     def _print_evaluation_table(self, results, includes_diversity=True):
-        """Print evaluation results in tabular format."""
         if includes_diversity:
             print(f"\n  {'Model':<30s} {'NDCG@5':<12s} {'Diversity':<12s} "
                   f"{'Avg Dist(km)':<14s} {'Coverage':<10s}")
@@ -573,15 +568,15 @@ class ModelComparison:
                 print(f"  {variant:<30s} {ndcg:<12.4f} {div:<12.4f} "
                       f"{dist:<14.2f} {cov:<10.4f}{marker}")
         else:
-            print(f"\n  {'Model':<30s} {'NDCG@5':<12s}")
-            print("  " + "-" * 42)
+            print(f"\n  {'Model':<30s} {'NDCG@5':<12s} {'Coverage':<10s}")
+            print("  " + "-" * 52)
             for variant, metrics in results.items():
                 ndcg = np.mean(metrics['ndcg']) if metrics['ndcg'] else 0.0
+                cov = len(metrics.get('items', set())) / max(1, len(self.acc)) if metrics.get('items') else 0.0
                 marker = " <-- CHOSEN" if variant == list(results.keys())[0] else ""
-                print(f"  {variant:<30s} {ndcg:<12.4f}{marker}")
+                print(f"  {variant:<30s} {ndcg:<12.4f} {cov:<10.4f}{marker}")
 
     def compare_model_1(self, chosen_model):
-        """Execute Model 1 comparison."""
         print("\n" + "=" * 80)
         print("MODEL 1 COMPARISON: SIMILAR PLACES RECOMMENDATION")
         print("=" * 80)
@@ -600,7 +595,6 @@ class ModelComparison:
         return results
 
     def compare_model_2(self, chosen_model):
-        """Execute Model 2 comparison."""
         print("\n" + "=" * 80)
         print("MODEL 2 COMPARISON: POPULAR PLACES NEARBY")
         print("=" * 80)
@@ -614,12 +608,10 @@ class ModelComparison:
         print("  - LambdaMART learns ranking weights vs Random Forest classification objective")
         print("  - BERT understands review context and semantics unlike rule-based lexicons")
         print("  - LambdaMART discovers location-specific feature importance patterns")
-        print("  - All enrichment data sourced from real tourists (Kaggle dataset)")
 
         return results
 
     def compare_model_3(self, chosen_model):
-        """Execute Model 3 comparison."""
         print("\n" + "=" * 80)
         print("MODEL 3 COMPARISON: NEARBY ESSENTIALS")
         print("=" * 80)
@@ -631,14 +623,12 @@ class ModelComparison:
         print("  - Separate LambdaMART per service type learns category-specific weights")
         print("  - Hotels prioritise budget+rating; Dining prioritises proximity+sentiment")
         print("  - BERT sentiment provides more accurate service review analysis than TextBlob")
-        print("  - LambdaMART (ranking) outperforms GBM (classification) for recommendation ranking")
+        print("  - LambdaMART (ranking) outperforms SVM (classification) for recommendation ranking")
         print("  - Per-type models adapt to structural differences between service categories")
-        print("  - Fallback mapping ensures complete coverage for places without nearby services")
 
         return results
 
     def run_full_comparison(self, model1, model2, model3):
-        """Execute the complete comparison for all three models."""
         print("\n" + "=" * 80)
         print("MODEL COMPARISON AND EVALUATION REPORT")
         print("=" * 80)
@@ -665,7 +655,7 @@ class ModelComparison:
             "Alternatives": [
                 "TF-IDF+KNN, Word2Vec+PCA",
                 "TextBlob+ManualWt, VADER+RF",
-                "TextBlob+ManualWt, TF-IDF+GBM"
+                "TextBlob+ManualWt, TF-IDF+SVM"
             ],
             "Advantage": [
                 "Semantic understanding + graph edges",
