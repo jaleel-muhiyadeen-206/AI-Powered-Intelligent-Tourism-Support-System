@@ -7,25 +7,12 @@ df['Facts'] = df['Facts'].apply(ast.literal_eval)
 
 
 def generate_narration(landmark, facts, significance):
-    prompt = f"""
-    Act as a professional Sri Lankan tour guide. 
-    Using the following facts and significance, create a 1-minute historical narration for a tourism video.
-
-    Landmark: {landmark}
-    Significance: {significance}
-    Facts: {", ".join(facts)}
-
-    Narration:
+    prompt = f"""Plan 5 scenes for a documentary about {landmark}. Facts: {facts}. Significance: {significance}. Format: Scene X | Video: [Visuals] | Audio: [Dialogue]
     """
 
     response = ollama.generate(model='llama3.1', prompt=prompt)
     return response['response']
 
-
-# Test it for Sigiriya
-sigiriya_row = df.iloc[1]
-story = generate_narration(sigiriya_row['Landmark'], sigiriya_row['Facts'], sigiriya_row['Significance'])
-print(f"--- Story for {sigiriya_row['Landmark']} ---\n{story}")
 
 from rouge_score import rouge_scorer
 from bert_score import score as bert_score_calculation
@@ -55,8 +42,20 @@ def evaluate_model(generated_text, reference_facts):
 
     return results
 
-# Example evaluation
-final_scores = evaluate_model(story, sigiriya_row['Facts'])
-print("--- Evaluation Results ---")
-for metric, value in final_scores.items():
-    print(f"{metric}: {value:.4f}")
+# Evaluation
+all_results = []
+
+print("Running evaluation for all 23 landmarks...")
+for index, row in df.iterrows():
+    # 1. Generate story
+    generated_story = generate_narration(row['Landmark'], row['Facts'], row['Significance'])
+
+    # 2. Evaluate
+    scores = evaluate_model(generated_story, row['Facts'])
+    scores['Landmark'] = row['Landmark']
+    all_results.append(scores)
+
+# 3. Create a summary table
+results_df = pd.DataFrame(all_results)
+print("\n--- Average Project Metrics ---")
+print(results_df[['ROUGE-1', 'ROUGE-2', 'ROUGE-L', 'BERTScore']].mean())
