@@ -206,9 +206,9 @@ def get_location_info(df):
 def load_models():
     """Load pre-trained models - cached so only loads once"""
     m = {
-        'temperature_2m_mean': lgb.Booster(model_file='weather-model/lightgbm_model_temperature_2m_mean.txt'),
-        'precipitation_sum': lgb.Booster(model_file='weather-model/lightgbm_model_precipitation_sum.txt'),
-        'windspeed_10m_max': lgb.Booster(model_file='weather-model/lightgbm_model_windspeed_10m_max.txt')
+        'temperature_2m_mean': lgb.Booster(model_file='weather-prediction/lightgbm_model_temperature_2m_mean.txt'),
+        'precipitation_sum': lgb.Booster(model_file='weather-prediction/lightgbm_model_precipitation_sum.txt'),
+        'windspeed_10m_max': lgb.Booster(model_file='weather-prediction/lightgbm_model_windspeed_10m_max.txt')
     }
     return m, joblib.load('feature_columns.pkl')
 
