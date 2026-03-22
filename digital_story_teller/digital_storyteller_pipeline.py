@@ -765,8 +765,6 @@ def run_pipeline(landmark_name: str):
         success = generate_veo_clip(client, scene, ref_img, clip_path, GEMINI_API_KEY)
         veo_clips.append(clip_path if success else None)
 
-    # Stage 5: REMOVED — gTTS audio generation
-    # Stage 6: REMOVED — audio merge
     # Veo clips already carry native, perfectly-synced narration audio.
 
     # Stage 7: Assemble documentary directly from Veo clips
@@ -852,6 +850,3 @@ if __name__ == "__main__":
     TARGET_LANDMARK = "Sigiriya"
     run_pipeline(TARGET_LANDMARK)
 
-    # Batch mode: uncomment to run ALL 23 landmarks
-    # WARNING: ~161 Veo API calls + significant API costs
-    # run_pipeline_all()
