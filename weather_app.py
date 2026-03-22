@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -167,6 +168,7 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 
 @st.cache_data
 def load_data():
+    """Load raw weather data - FAST because no processing"""
     df = pd.read_csv('weather_data_lightweight_smart.csv',
                      usecols=['time', 'name', 'station_lat', 'station_lng',
                               'temperature_2m_max', 'temperature_2m_min',
@@ -186,7 +188,9 @@ def get_location_info(df):
     location_info = df.groupby('name').agg({
         'address': 'first',
         'district': 'first',
-        'city_x': 'first'
+        'city_x': 'first',
+        'location_lat': 'first',
+        'location_lng': 'first'
     }).reset_index()
 
     # Create display name with address
@@ -200,6 +204,7 @@ def get_location_info(df):
 
 @st.cache_resource
 def load_models():
+    """Load pre-trained models - cached so only loads once"""
     m = {
         'temperature_2m_mean': lgb.Booster(model_file='lightgbm_model_temperature_2m_mean.txt'),
         'precipitation_sum': lgb.Booster(model_file='lightgbm_model_precipitation_sum.txt'),
@@ -208,8 +213,20 @@ def load_models():
     return m, joblib.load('feature_columns.pkl')
 
 
-def create_features(df):
-    d = df.copy()
+def create_features_for_location(df, location_name):
+    """
+    OPTIMIZED: Create features only for selected location (~220 rows instead of 208K)
+    This is called on-demand when user clicks predict, not on page load
+    """
+    # Filter FIRST - reduces processing from 208K to ~220 rows
+    loc_df = df[df['name'] == location_name].copy()
+
+    if len(loc_df) == 0:
+        return None
+
+    d = loc_df.copy()
+
+    # Time-based features
     d['hour'] = 12
     d['day'] = d['time'].dt.day
     d['month'] = d['time'].dt.month
@@ -217,57 +234,100 @@ def create_features(df):
     d['day_of_year'] = d['time'].dt.dayofyear
     d['day_of_week'] = d['time'].dt.dayofweek
     d['is_weekend'] = d['day_of_week'].isin([5, 6]).astype(int)
+
+    # Cyclical encoding
     d['month_sin'] = np.sin(2 * np.pi * d['month'] / 12)
     d['month_cos'] = np.cos(2 * np.pi * d['month'] / 12)
     d['day_sin'] = np.sin(2 * np.pi * d['day_of_year'] / 365)
     d['day_cos'] = np.cos(2 * np.pi * d['day_of_year'] / 365)
+
+    # Label encoding (only for this location's unique values)
     le_d, le_k, le_c = LabelEncoder(), LabelEncoder(), LabelEncoder()
     d['district_encoded'] = le_d.fit_transform(d['district'].fillna('Unknown'))
     d['keyword_encoded'] = le_k.fit_transform(d['keyword'].fillna('Unknown'))
     d['city_encoded'] = le_c.fit_transform(d['city_x'].fillna('Unknown'))
+
+    # Weather-based features
     d['temp_range'] = d['temperature_2m_max'] - d['temperature_2m_min']
     d['apparent_diff'] = d['apparent_temperature_mean'] - d['temperature_2m_mean']
     d['rain_intensity'] = d['rain_sum'] / (d['precipitation_hours'] + 1)
-    d = d.sort_values(['name', 'time'])
-    d['temp_lag_1'] = d.groupby('name')['temperature_2m_mean'].shift(1)
-    d['temp_lag_7'] = d.groupby('name')['temperature_2m_mean'].shift(7)
-    d['rain_lag_1'] = d.groupby('name')['rain_sum'].shift(1)
-    d['temp_rolling_3'] = d.groupby('name')['temperature_2m_mean'].transform(
-        lambda x: x.rolling(3, min_periods=1).mean())
-    d['temp_rolling_7'] = d.groupby('name')['temperature_2m_mean'].transform(
-        lambda x: x.rolling(7, min_periods=1).mean())
-    d['wind_lag_1'] = d.groupby('name')['windspeed_10m_max'].shift(1)
-    d['wind_lag_7'] = d.groupby('name')['windspeed_10m_max'].shift(7)
-    d['wind_rolling_3'] = d.groupby('name')['windspeed_10m_max'].transform(lambda x: x.rolling(3, min_periods=1).mean())
-    d['wind_rolling_7'] = d.groupby('name')['windspeed_10m_max'].transform(lambda x: x.rolling(7, min_periods=1).mean())
+
+    # Sort by time for lag/rolling features (only for this location)
+    d = d.sort_values('time')
+
+    # Lag features
+    d['temp_lag_1'] = d['temperature_2m_mean'].shift(1)
+    d['temp_lag_7'] = d['temperature_2m_mean'].shift(7)
+    d['rain_lag_1'] = d['rain_sum'].shift(1)
+    d['wind_lag_1'] = d['windspeed_10m_max'].shift(1)
+    d['wind_lag_7'] = d['windspeed_10m_max'].shift(7)
+
+    # Rolling features
+    d['temp_rolling_3'] = d['temperature_2m_mean'].rolling(3, min_periods=1).mean()
+    d['temp_rolling_7'] = d['temperature_2m_mean'].rolling(7, min_periods=1).mean()
+    d['wind_rolling_3'] = d['windspeed_10m_max'].rolling(3, min_periods=1).mean()
+    d['wind_rolling_7'] = d['windspeed_10m_max'].rolling(7, min_periods=1).mean()
+
+    # Wind log transform
     d['wind_log'] = np.log1p(d['windspeed_10m_max'])
+
+    # Fill missing values
     nc = d.select_dtypes(include='number').columns
     d[nc] = d[nc].bfill().ffill()
-    return d, le_d, le_k, le_c
+
+    return d
 
 
-def predict_weather(location_name, target_date, df_enhanced, models, feature_cols):
+def predict_weather(location_name, target_date, df_raw, models, feature_cols):
+    """
+    Creates features on-demand for selected location only
+    """
+    # Create features only for this specific location
+    df_enhanced = create_features_for_location(df_raw, location_name)
+
+    if df_enhanced is None or len(df_enhanced) == 0:
+        return None
+
     td = pd.to_datetime(target_date)
-    loc = df_enhanced[df_enhanced['name'] == location_name]
-    if len(loc) == 0: return None
-    lat = loc.sort_values('time').iloc[-1:].copy()
+
+    # Get most recent data for this location
+    lat = df_enhanced.sort_values('time').iloc[-1:].copy()
+
+    # Build feature dictionary
     feat = {col: (lat[col].values[0] if col in lat.columns else 0) for col in feature_cols}
-    feat.update({'day': td.day, 'month': td.month, 'year': td.year, 'day_of_year': td.dayofyear,
-                 'day_of_week': td.dayofweek, 'is_weekend': 1 if td.dayofweek >= 5 else 0,
-                 'month_sin': np.sin(2 * np.pi * td.month / 12), 'month_cos': np.cos(2 * np.pi * td.month / 12),
-                 'day_sin': np.sin(2 * np.pi * td.dayofyear / 365), 'day_cos': np.cos(2 * np.pi * td.dayofyear / 365),
-                 'hour': 12})
+
+    # Update time-based features for target date
+    feat.update({
+        'day': td.day,
+        'month': td.month,
+        'year': td.year,
+        'day_of_year': td.dayofyear,
+        'day_of_week': td.dayofweek,
+        'is_weekend': 1 if td.dayofweek >= 5 else 0,
+        'month_sin': np.sin(2 * np.pi * td.month / 12),
+        'month_cos': np.cos(2 * np.pi * td.month / 12),
+        'day_sin': np.sin(2 * np.pi * td.dayofyear / 365),
+        'day_cos': np.cos(2 * np.pi * td.dayofyear / 365),
+        'hour': 12
+    })
+
     pdf = pd.DataFrame([feat])
+
+    # Make predictions
     out = {}
     for t, m in models.items():
         p = m.predict(pdf[feature_cols], num_iteration=m.best_iteration)[0]
         # FIXED: NO expm1 transformation - model outputs correct values
         out[t] = round(p, 2)
+
     return out
 
 
 def score_weather(temp, rain, wind):
+    """Calculate 0-100 travel score based on weather conditions"""
     s = 0
+
+    # Temperature scoring (max 40 points)
     if 24 <= temp <= 30:
         s += 40
     elif 22 <= temp < 24 or 30 < temp <= 33:
@@ -276,6 +336,8 @@ def score_weather(temp, rain, wind):
         s += 22
     else:
         s += 10
+
+    # Precipitation scoring (max 35 points)
     if rain == 0:
         s += 35
     elif rain < 5:
@@ -286,6 +348,8 @@ def score_weather(temp, rain, wind):
         s += 14
     elif rain < 50:
         s += 7
+
+    # Wind speed scoring (max 25 points)
     if wind < 10:
         s += 25
     elif wind < 20:
@@ -294,10 +358,12 @@ def score_weather(temp, rain, wind):
         s += 13
     elif wind < 45:
         s += 6
+
     return s
 
 
 def get_suggestion(score):
+    """Get travel suggestion based on weather score"""
     if score >= 70:
         return "good", "✓", "Ideal weather for exploring heritage sites!"
     elif score >= 50:
@@ -307,6 +373,7 @@ def get_suggestion(score):
 
 
 def get_season(month):
+    """Get seasonal information for Sri Lanka"""
     if month in [12, 1, 2]:
         return "❄️", "Northeast Monsoon", "Cool and dry in most areas. Northeast coast may experience rain."
     elif month in [3, 4]:
@@ -317,12 +384,14 @@ def get_season(month):
         return "🌦", "Second Inter-Monsoon", "Rainfall island-wide. Both coasts can experience showers."
 
 
-# Load data
+# =============================================================================
+# MAIN APP - Load data (NO feature engineering on startup)
+# =============================================================================
+
 with st.spinner("Loading..."):
-    df = load_data()
+    df = load_data()  # Just loads raw CSV - FAST
     location_info = get_location_info(df)
     models, feature_cols = load_models()
-    df_enh, le_d, le_k, le_c = create_features(df)
 
 st.markdown("""
 <div class="page-title">⛅ Smart Weather Prediction</div>
@@ -338,7 +407,7 @@ st.markdown(
 st.markdown('<div class="input-label">🔍 Search locations</div>', unsafe_allow_html=True)
 
 # User can type to search
-user_input = st.text_input("",
+user_input = st.text_input("Search",
                            placeholder="Type to search (e.g., Sigiriya, Colombo, Kandy)...",
                            label_visibility="collapsed",
                            key="location_search")
@@ -358,7 +427,7 @@ if user_input:
 
         # Show dropdown with filtered results
         selected_location = st.selectbox(
-            "",
+            "Select location",
             options=filtered_locations['name'].tolist(),
             format_func=lambda x: location_info[location_info['name'] == x]['display_name'].values[0],
             label_visibility="collapsed",
@@ -381,7 +450,7 @@ else:
         unsafe_allow_html=True)
 
     landmark = st.selectbox(
-        "",
+        "Select location",
         options=location_info['name'].tolist(),
         format_func=lambda x: location_info[location_info['name'] == x]['display_name'].values[0],
         label_visibility="collapsed",
@@ -397,7 +466,7 @@ else:
 col_date, col_btn = st.columns([3, 1])
 with col_date:
     st.markdown('<div class="input-label">Select your visit date</div>', unsafe_allow_html=True)
-    selected_date = st.date_input("",
+    selected_date = st.date_input("Date",
                                   value=date.today() + timedelta(days=1),
                                   min_value=date.today(),
                                   max_value=date.today() + timedelta(days=365 * 4),
@@ -409,7 +478,8 @@ with col_btn:
 
 if predict_btn and landmark:
     with st.spinner("Predicting..."):
-        pred = predict_weather(landmark, selected_date, df_enh, models, feature_cols)
+        # Features created on-demand for selected location only - FAST
+        pred = predict_weather(landmark, selected_date, df, models, feature_cols)
 
     if pred:
         temp = pred['temperature_2m_mean']
@@ -455,7 +525,6 @@ if predict_btn and landmark:
             <div><strong>Smart Travel Suggestion:</strong> {stext}</div>
         </div>
         """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
 
         # Season
         st.markdown(f"""
@@ -470,9 +539,8 @@ if predict_btn and landmark:
 
         # Uber
         loc_details = location_info[location_info['name'] == landmark].iloc[0]
-        loc_data = df[df['name'] == landmark].iloc[0]
 
-        uber_link = f"https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]={loc_data['location_lat']}&dropoff[longitude]={loc_data['location_lng']}&dropoff[nickname]={landmark.replace(' ', '%20')}"
+        uber_link = f"https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]={loc_details['location_lat']}&dropoff[longitude]={loc_details['location_lng']}&dropoff[nickname]={landmark.replace(' ', '%20')}"
 
         st.markdown(f"""
                 <div class="uber-card">
