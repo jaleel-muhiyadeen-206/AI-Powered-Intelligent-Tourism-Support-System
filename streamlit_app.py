@@ -8,18 +8,23 @@ Models:
     Model2: Popular Places Nearby (BERT + Kaggle + LambdaMART)
     Model3: Nearby Essentials (BERT + per-type LambdaMART)
 
+Input Modes:
+    1. Search & Select: User types a place name and selects from dataset
+    2. External Input: Another model passes a place name via URL query parameter
+
 User Interactions:
-    - Likes: stored in data/user_likes.csv, boost liked places in ranking
-    - Reviews: stored in data/user_reviews.csv, update display reviews via BERT
-    - Ratings: stored in data/user_ratings.csv, averaged into place ratings
+    - Likes: Liked places get priority boost in recommendations
+    - Reviews: Replace display_review in Model 1, replace review columns in Model 2
+    - Ratings: Stored in CSV, affect displayed rating
 """
 
 import streamlit as st
 import pandas as pd
 import joblib
 import os
-import random
+import html as html_module
 from datetime import datetime
+from difflib import SequenceMatcher
 
 from models.model_1_you_may_also_like import Model1_YouMayAlsoLike
 from models.model_2_popular_nearby import Model2_PopularNearby
@@ -69,32 +74,36 @@ def is_liked(place_id):
     return place_id in df['place_id'].values
 
 
-def add_review(place_id, review_text):
+def get_liked_place_ids():
     _ensure_user_data_files()
-    df = pd.read_csv(USER_REVIEWS_PATH)
-    new_row = pd.DataFrame([{
-        'place_id': place_id, 'review': review_text,
-        'timestamp': datetime.now().isoformat()
-    }])
-    df = pd.concat([df, new_row], ignore_index=True)
-    df.to_csv(USER_REVIEWS_PATH, index=False)
+    df = pd.read_csv(USER_LIKES_PATH)
+    return set(df['place_id'].tolist())
+
+
+def add_review_and_rating(place_id, review_text, rating):
+    _ensure_user_data_files()
+    if review_text and str(review_text).strip():
+        rdf = pd.read_csv(USER_REVIEWS_PATH)
+        new_row = pd.DataFrame([{
+            'place_id': place_id, 'review': review_text,
+            'timestamp': datetime.now().isoformat()
+        }])
+        rdf = pd.concat([rdf, new_row], ignore_index=True)
+        rdf.to_csv(USER_REVIEWS_PATH, index=False)
+    if rating and rating > 0:
+        rtdf = pd.read_csv(USER_RATINGS_PATH)
+        new_row = pd.DataFrame([{
+            'place_id': place_id, 'rating': rating,
+            'timestamp': datetime.now().isoformat()
+        }])
+        rtdf = pd.concat([rtdf, new_row], ignore_index=True)
+        rtdf.to_csv(USER_RATINGS_PATH, index=False)
 
 
 def get_reviews_for_place(place_id):
     _ensure_user_data_files()
     df = pd.read_csv(USER_REVIEWS_PATH)
     return df[df['place_id'] == place_id]['review'].tolist()
-
-
-def add_rating(place_id, rating):
-    _ensure_user_data_files()
-    df = pd.read_csv(USER_RATINGS_PATH)
-    new_row = pd.DataFrame([{
-        'place_id': place_id, 'rating': rating,
-        'timestamp': datetime.now().isoformat()
-    }])
-    df = pd.concat([df, new_row], ignore_index=True)
-    df.to_csv(USER_RATINGS_PATH, index=False)
 
 
 def get_average_rating(place_id, original_rating):
@@ -111,6 +120,54 @@ def get_rating_count(place_id):
     _ensure_user_data_files()
     df = pd.read_csv(USER_RATINGS_PATH)
     return len(df[df['place_id'] == place_id])
+
+
+def update_model1_display_review(sub1_df, place_id, user_reviews):
+    if user_reviews:
+        mask = sub1_df['place_id'] == place_id
+        if mask.any():
+            sub1_df.loc[mask, 'display_review'] = user_reviews[-1]
+    return sub1_df
+
+
+def update_model2_reviews(model2, place_id, user_reviews):
+    if not user_reviews or not hasattr(model2, 'df'):
+        return
+    mask = model2.df['place_id'] == place_id
+    if not mask.any():
+        return
+    review_cols = ['review_1', 'review_2', 'review_3', 'review_4', 'review_5']
+    for i, review in enumerate(user_reviews[:5]):
+        if i < len(review_cols):
+            model2.df.loc[mask, review_cols[i]] = review
+    if 'display_review' in model2.df.columns and user_reviews:
+        model2.df.loc[mask, 'display_review'] = user_reviews[-1]
+
+
+def boost_liked_recommendations(recs_df, liked_ids):
+    if recs_df.empty or not liked_ids:
+        return recs_df
+    recs = recs_df.copy()
+    for idx, row in recs.iterrows():
+        name = row.get('name', '')
+        if any(pid in str(name) for pid in liked_ids):
+            recs.at[idx, 'final_score'] = row['final_score'] * 1.15
+    recs = recs.sort_values('final_score', ascending=False).reset_index(drop=True)
+    recs['rank'] = range(1, len(recs) + 1)
+    return recs
+
+
+def fuzzy_match_place(place_name, sub1_df, threshold=0.60):
+    best_ratio, best_match = 0, None
+    name_lower = place_name.lower().strip()
+    for _, row in sub1_df.iterrows():
+        ratio = SequenceMatcher(None, name_lower, row['place_name'].lower().strip()).ratio()
+        if ratio > best_ratio:
+            best_ratio = ratio
+            best_match = row
+    if best_ratio >= threshold and best_match is not None:
+        return best_match['place_id'], best_match['place_name'], best_ratio
+    return None, None, 0.0
 
 
 @st.cache_resource
@@ -142,7 +199,6 @@ def inject_css():
         --gold: #f59e0b;
         --green: #10b981;
         --border-color: rgba(168, 85, 247, 0.15);
-        --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.4);
     }
     .stApp {
         background: var(--bg-primary) !important;
@@ -244,42 +300,69 @@ def inject_css():
         color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;
     }
 
+    /* Force all st.columns children to stretch equally */
+    [data-testid="stHorizontalBlock"] {
+        align-items: stretch !important;
+    }
+    [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] > div {
+        flex: 1 !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
     .rec-card {
         background: var(--bg-card); border-radius: 16px; overflow: hidden;
-        border: 1px solid var(--border-color); transition: all 0.3s ease; height: 100%;
+        border: 1px solid var(--border-color); transition: all 0.3s ease;
+        display: flex; flex-direction: column; min-height: 380px; height: 100%;
     }
     .rec-card:hover {
         transform: translateY(-4px);
         border-color: rgba(168, 85, 247, 0.4);
         box-shadow: 0 12px 30px rgba(124, 58, 237, 0.15);
     }
-    .rec-card-img { width: 100%; height: 180px; object-fit: cover; }
+    .rec-card-img-wrap { position: relative; width: 100%; flex-shrink: 0; }
+    .rec-card-img { width: 100%; height: 160px; object-fit: cover; display: block; }
+    .rec-card-placeholder {
+        width: 100%; height: 160px; background: var(--bg-card-hover);
+        display: flex; align-items: center; justify-content: center;
+        color: var(--text-secondary); font-size: 2rem;
+    }
     .rec-card-badge {
-        position: absolute; top: 12px; left: 12px;
+        position: absolute; top: 10px; left: 10px;
         background: var(--accent-gradient); color: white;
-        font-weight: 700; font-size: 0.75rem; padding: 4px 10px; border-radius: 8px;
+        font-weight: 700; font-size: 0.7rem; padding: 3px 8px; border-radius: 6px;
     }
     .rec-card-distance {
-        position: absolute; top: 12px; right: 12px;
-        background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px);
-        color: white; font-size: 0.7rem; padding: 4px 8px; border-radius: 6px;
+        position: absolute; top: 10px; right: 10px;
+        background: rgba(0, 0, 0, 0.65); backdrop-filter: blur(8px);
+        color: white; font-size: 0.65rem; padding: 3px 7px; border-radius: 5px;
     }
-    .rec-card-body { padding: 1rem; }
+    .rec-card-body {
+        padding: 0.8rem; flex: 1; display: flex; flex-direction: column;
+    }
     .rec-card-name {
         font-family: 'Outfit', sans-serif; font-weight: 600;
-        font-size: 1rem; color: white; margin-bottom: 0.4rem;
+        font-size: 0.9rem; color: white; margin-bottom: 0.3rem;
+        line-height: 1.3; min-height: 2.4em;
+        overflow: hidden; text-overflow: ellipsis;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
     }
     .rec-card-meta {
-        display: flex; align-items: center; gap: 0.8rem;
-        margin-bottom: 0.4rem; font-size: 0.8rem;
+        display: flex; align-items: center; gap: 0.5rem;
+        margin-bottom: 0.3rem; font-size: 0.75rem;
     }
     .rec-card-rating { color: var(--gold); font-weight: 600; }
-    .rec-card-type { color: var(--accent-purple); font-weight: 500; }
-    .rec-card-district { color: var(--text-secondary); font-size: 0.75rem; margin-bottom: 0.5rem; }
+    .rec-card-type { color: var(--accent-purple); font-weight: 500; font-size: 0.7rem; }
+    .rec-card-district { color: var(--text-secondary); font-size: 0.7rem; margin-bottom: 0.4rem; }
     .rec-card-review {
-        color: var(--text-secondary); font-size: 0.78rem; line-height: 1.5;
+        color: var(--text-secondary); font-size: 0.72rem; line-height: 1.4;
         font-style: italic; display: -webkit-box;
         -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+        margin-top: auto;
     }
 
     .service-card {
@@ -305,17 +388,14 @@ def inject_css():
         display: -webkit-box; -webkit-line-clamp: 2;
         -webkit-box-orient: vertical; overflow: hidden;
     }
-
-
-    .footer {
-        text-align: center; padding: 2rem; color: var(--text-secondary);
-        font-size: 0.8rem; border-top: 1px solid var(--border-color); margin-top: 3rem;
-    }
-
     .rank-badge {
         display: inline-block; background: var(--accent-gradient); color: white;
         font-weight: 700; font-size: 0.7rem; padding: 2px 8px;
         border-radius: 6px; margin-right: 0.5rem;
+    }
+    .footer {
+        text-align: center; padding: 2rem; color: var(--text-secondary);
+        font-size: 0.8rem; border-top: 1px solid var(--border-color); margin-top: 3rem;
     }
 
     div[data-testid="stSelectbox"] label { color: var(--text-secondary) !important; }
@@ -369,60 +449,112 @@ def render_hero():
     """, unsafe_allow_html=True)
 
 
-def render_rec_card(rank, name, rating, distance, review, place_type="",
-                    district="", image_url=""):
-    review_short = str(review)[:150] + "..." if len(str(review)) > 150 else str(review)
+def render_rec_card_html(rank, name, rating, distance, review, place_type="",
+                         district="", image_url=""):
+    """Generate a single recommendation card as HTML."""
+    safe_name = html_module.escape(str(name))
+    safe_review = html_module.escape(str(review)[:120])
+    if len(str(review)) > 120:
+        safe_review += "..."
+    safe_type = html_module.escape(str(place_type)) if place_type else ''
+    safe_district = html_module.escape(str(district)) if district else ''
     if image_url and str(image_url).startswith("http"):
-        img_html = f'<img src="{image_url}" class="rec-card-img" onerror="this.style.display=\'none\'">'
+        img_html = f'<img src="{image_url}" class="rec-card-img" onerror="this.style.display=\'none\'; this.parentElement.querySelector(\'.rec-card-placeholder\') && (this.parentElement.querySelector(\'.rec-card-placeholder\').style.display=\'flex\')">'
+        placeholder = '<div class="rec-card-placeholder" style="display:none;">📍</div>'
     else:
-        img_html = (f'<div style="width:100%;height:180px;background:var(--bg-card-hover);'
-                    f'display:flex;align-items:center;justify-content:center;'
-                    f'color:var(--text-secondary);font-size:0.9rem;">📍 {name}</div>')
-    type_html = f'<span class="rec-card-type">{place_type}</span>' if place_type else ''
+        img_html = ''
+        placeholder = '<div class="rec-card-placeholder">📍</div>'
+    type_html = f'<span class="rec-card-type">{safe_type}</span>' if safe_type else ''
+    district_html = f'<div class="rec-card-district">📍 {safe_district}</div>' if safe_district else ''
     return f"""
     <div class="rec-card">
-        <div style="position:relative;">
-            {img_html}
+        <div class="rec-card-img-wrap">
+            {img_html}{placeholder}
             <div class="rec-card-badge">#{rank}</div>
             <div class="rec-card-distance">{distance} km</div>
         </div>
         <div class="rec-card-body">
-            <div class="rec-card-name">{name}</div>
+            <div class="rec-card-name">{safe_name}</div>
             <div class="rec-card-meta">
                 <span class="rec-card-rating">★ {rating}/5</span>
                 {type_html}
             </div>
-            <div class="rec-card-district">📍 {district}</div>
-            <div class="rec-card-review">"{review_short}"</div>
+            {district_html}
+            <div class="rec-card-review">"{safe_review}"</div>
         </div>
     </div>
     """
 
 
+def render_cards_row(recs_df, show_type=False):
+    """Render 5 cards using st.columns — each card is forced to same height via CSS."""
+    if recs_df.empty:
+        st.info("No recommendations found within the distance limit.")
+        return
+    n = len(recs_df)
+    cols = st.columns(max(n, 5))
+    for i, (_, rec) in enumerate(recs_df.iterrows()):
+        if i >= 5:
+            break
+        with cols[i]:
+            html = render_rec_card_html(
+                rec['rank'], rec['name'], rec['rating'],
+                rec['distance_km'],
+                rec.get('review', 'A remarkable destination.'),
+                rec.get('type', '') if show_type else '',
+                rec.get('district', ''),
+                rec.get('image', '')
+            )
+            st.markdown(html, unsafe_allow_html=True)
+
+
 def render_service_card(rank, name, rating, distance, review, budget="", image_url=""):
-    review_short = str(review)[:120] + "..." if len(str(review)) > 120 else str(review)
+    safe_name = html_module.escape(str(name))
+    safe_review = html_module.escape(str(review)[:120])
+    if len(str(review)) > 120:
+        safe_review += "..."
+    safe_budget = html_module.escape(str(budget)) if budget else ''
     if image_url and str(image_url).startswith("http"):
         img_html = f'<img src="{image_url}" class="service-card-img" onerror="this.style.display=\'none\'">'
     else:
         img_html = ('<div style="width:120px;min-height:120px;background:var(--bg-card-hover);'
                     'display:flex;align-items:center;justify-content:center;'
                     'color:var(--text-secondary);font-size:0.8rem;flex-shrink:0;">🏨</div>')
-    budget_html = f'<div class="service-card-budget">💰 {budget}</div>' if budget else ''
+    budget_html = f'<div class="service-card-budget">💰 {safe_budget}</div>' if safe_budget else ''
     return f"""
     <div class="service-card">
         {img_html}
         <div class="service-card-body">
-            <div class="service-card-name"><span class="rank-badge">#{rank}</span>{name}</div>
+            <div class="service-card-name"><span class="rank-badge">#{rank}</span>{safe_name}</div>
             <div class="service-card-meta">
                 <span class="service-card-rating">★ {rating}/5</span>
                 <span class="service-card-distance">{distance} km</span>
             </div>
             {budget_html}
-            <div class="service-card-review">"{review_short}"</div>
+            <div class="service-card-review">"{safe_review}"</div>
         </div>
     </div>
     """
 
+
+def render_star_rating(pid):
+    """Render Google Maps-style clickable star rating using 5 star buttons."""
+    if f'user_star_{pid}' not in st.session_state:
+        st.session_state[f'user_star_{pid}'] = 0
+
+    current = st.session_state[f'user_star_{pid}']
+
+    star_cols = st.columns([1, 1, 1, 1, 1, 4])
+    for i in range(5):
+        star_num = i + 1
+        with star_cols[i]:
+            label = "★" if star_num <= current else "☆"
+            if st.button(label, key=f"star_{pid}_{star_num}",
+                         help=f"{star_num} star{'s' if star_num > 1 else ''}"):
+                st.session_state[f'user_star_{pid}'] = star_num
+                st.rerun()
+
+    return current
 
 
 def render_place_results(place, sub1, model1, model2, model3):
@@ -436,7 +568,13 @@ def render_place_results(place, sub1, model1, model2, model3):
     avg_rating = get_average_rating(pid, original_rating)
     user_rating_count = get_rating_count(pid)
     user_reviews = get_reviews_for_place(pid)
+    liked_ids = get_liked_place_ids()
 
+    if user_reviews:
+        update_model1_display_review(sub1, pid, user_reviews)
+        update_model2_reviews(model2, pid, user_reviews)
+
+    # ── Place Header ───────────────────────────────────────────────────
     if image_url and str(image_url).startswith("http"):
         st.markdown(f"""
         <div class="place-header">
@@ -458,74 +596,74 @@ def render_place_results(place, sub1, model1, model2, model3):
         </div>
         """, unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        liked = is_liked(pid)
-        if st.button("❤️ Liked" if liked else "🤍 Like", key=f"like_btn_{pid}"):
-            if liked:
-                remove_like(pid)
-                st.toast("Removed from favorites")
-            else:
-                add_like(pid)
-                st.toast("❤️ Added to favorites!")
-            st.rerun()
-    with col2:
-        if st.button("💬 Write Review", key=f"review_btn_{pid}"):
-            st.session_state['show_review_modal'] = pid
-    with col3:
-        if st.button("⭐ Rate", key=f"rate_btn_{pid}"):
-            st.session_state['show_rating_modal'] = pid
+    # ── Like button ────────────────────────────────────────────────────
+    liked = is_liked(pid)
+    if st.button("❤️ Liked" if liked else "🤍 Like this place", key=f"like_btn_{pid}"):
+        if liked:
+            remove_like(pid)
+            st.toast("Removed from favorites")
+        else:
+            add_like(pid)
+            st.toast("❤️ Added to favorites! Liked places get priority in recommendations.")
+        st.rerun()
 
-    if st.session_state.get('show_review_modal') == pid:
+    # ── Combined Rate & Review ─────────────────────────────────────────
+    with st.expander("⭐ Rate & Review", expanded=False):
         st.markdown(f"""
-        <div class="section-title">Write a Review</div>
-        <div class="section-subtitle">Share your experience at {pname}</div>
+        <div style="color:white;font-family:'Outfit',sans-serif;font-weight:700;font-size:1.1rem;margin-bottom:0.3rem;">
+            Rate your experience at {pname}
+        </div>
+        <div style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:0.8rem;">
+            Click a star to set your rating, then write your review below
+        </div>
         """, unsafe_allow_html=True)
+
+        # Clickable star rating
+        star_rating = render_star_rating(pid)
+
+        current_stars = st.session_state.get(f'user_star_{pid}', 0)
+        if current_stars > 0:
+            st.markdown(
+                f'<div style="color:var(--gold);font-weight:600;margin-bottom:0.8rem;">'
+                f'Your rating: {"★" * current_stars}{"☆" * (5 - current_stars)} ({current_stars}/5)</div>',
+                unsafe_allow_html=True
+            )
+
         review_text = st.text_area(
-            "Your review", placeholder="Tell others about your experience...",
-            key=f"review_text_{pid}"
+            "Write your review",
+            placeholder="Tell others about your experience at this place...",
+            key=f"review_text_{pid}",
+            height=100,
+            label_visibility="collapsed"
         )
-        c1, c2 = st.columns(2)
-        with c1:
-            if st.button("Submit Review", key=f"submit_review_{pid}"):
+
+        if st.button("Submit", key=f"submit_rr_{pid}"):
+            final_rating = st.session_state.get(f'user_star_{pid}', 0)
+            if final_rating == 0 and not review_text:
+                st.warning("Please select a star rating or write a review.")
+            else:
+                add_review_and_rating(pid, review_text, final_rating)
+                st.session_state[f'user_star_{pid}'] = 0
+                parts = []
                 if review_text:
-                    add_review(pid, review_text)
-                    st.session_state['show_review_modal'] = None
-                    st.toast("Review submitted!")
-                    st.rerun()
-        with c2:
-            if st.button("Cancel", key=f"cancel_review_{pid}"):
-                st.session_state['show_review_modal'] = None
+                    parts.append("review")
+                if final_rating > 0:
+                    parts.append(f"{final_rating}-star rating")
+                st.toast(f"✅ Submitted {' and '.join(parts)}!")
                 st.rerun()
 
-    if st.session_state.get('show_rating_modal') == pid:
-        st.markdown(f"""
-        <div class="section-title">Rate this Place</div>
-        <div class="section-subtitle">How would you rate {pname}?</div>
-        """, unsafe_allow_html=True)
-        user_rating = st.slider("Your rating", 1, 5, 5, key=f"rating_slider_{pid}")
-        c1, c2 = st.columns(2)
-        with c1:
-            if st.button("Submit Rating", key=f"submit_rating_{pid}"):
-                add_rating(pid, user_rating)
-                st.session_state['show_rating_modal'] = None
-                st.toast(f"Rated {user_rating}/5 stars!")
-                st.rerun()
-        with c2:
-            if st.button("Cancel", key=f"cancel_rating_{pid}"):
-                st.session_state['show_rating_modal'] = None
-                st.rerun()
-
+    # ── Show user's past reviews ───────────────────────────────────────
     if user_reviews:
         st.markdown(f"""
-        <div style="background:var(--bg-card);border-radius:12px;padding:1rem;margin-top:1rem;border:1px solid var(--border-color);">
+        <div style="background:var(--bg-card);border-radius:12px;padding:1rem;margin-bottom:1rem;border:1px solid var(--border-color);">
             <div style="color:var(--accent-purple);font-weight:600;margin-bottom:0.5rem;">Your Reviews ({len(user_reviews)})</div>
-            {''.join(f'<div style="color:var(--text-secondary);font-style:italic;margin-bottom:0.3rem;">"{r}"</div>' for r in user_reviews[-3:])}
+            {''.join(f'<div style="color:var(--text-secondary);font-style:italic;margin-bottom:0.3rem;">"' + str(r) + '"</div>' for r in user_reviews[-3:])}
         </div>
         """, unsafe_allow_html=True)
 
     st.markdown("---")
 
+    # ── Model 1: You May Also Like ─────────────────────────────────────
     st.markdown("""
     <div class="section-title">💎 You May Also Like</div>
     <div class="section-subtitle">Similar places based on semantic similarity, graph relations, and learned ranking</div>
@@ -533,24 +671,14 @@ def render_place_results(place, sub1, model1, model2, model3):
 
     try:
         recs1 = model1.recommend(pid, top_n=5)
-        if not recs1.empty:
-            cols = st.columns(min(5, len(recs1)))
-            for i, (_, rec) in enumerate(recs1.iterrows()):
-                with cols[i]:
-                    st.markdown(render_rec_card(
-                        rec['rank'], rec['name'], rec['rating'],
-                        rec['distance_km'],
-                        rec.get('review', 'A remarkable destination.'),
-                        rec.get('type', ''), rec.get('district', ''),
-                        rec.get('image', '')
-                    ), unsafe_allow_html=True)
-        else:
-            st.info("No similar places found within the distance limit.")
+        recs1 = boost_liked_recommendations(recs1, liked_ids)
+        render_cards_row(recs1, show_type=True)
     except Exception as e:
         st.warning(f"Model 1 recommendations unavailable: {e}")
 
     st.markdown("---")
 
+    # ── Model 2: Popular Places Nearby ─────────────────────────────────
     st.markdown("""
     <div class="section-title">🔥 Popular Places Nearby</div>
     <div class="section-subtitle">Trending destinations ranked by BERT sentiment and Kaggle review enrichment</div>
@@ -558,24 +686,14 @@ def render_place_results(place, sub1, model1, model2, model3):
 
     try:
         recs2 = model2.recommend(pid, top_n=5)
-        if not recs2.empty:
-            cols = st.columns(min(5, len(recs2)))
-            for i, (_, rec) in enumerate(recs2.iterrows()):
-                with cols[i]:
-                    st.markdown(render_rec_card(
-                        rec['rank'], rec['name'], rec['rating'],
-                        rec['distance_km'],
-                        rec.get('review', 'A popular destination.'),
-                        district=rec.get('district', ''),
-                        image_url=rec.get('image', '')
-                    ), unsafe_allow_html=True)
-        else:
-            st.info("No popular places found within the distance limit.")
+        recs2 = boost_liked_recommendations(recs2, liked_ids)
+        render_cards_row(recs2, show_type=False)
     except Exception as e:
         st.warning(f"Model 2 recommendations unavailable: {e}")
 
     st.markdown("---")
 
+    # ── Model 3: Nearby Services ───────────────────────────────────────
     st.markdown("""
     <div class="section-title">🏨 Nearby Services</div>
     <div class="section-subtitle">Hotels, dining, and activities ranked by BERT sentiment with per-type LambdaMART</div>
@@ -611,6 +729,11 @@ def render_place_results(place, sub1, model1, model2, model3):
     """, unsafe_allow_html=True)
 
 
+def recommend_by_name(place_name, sub1):
+    pid, matched_name, score = fuzzy_match_place(place_name, sub1)
+    return pid, matched_name, score
+
+
 def main():
     _ensure_user_data_files()
     inject_css()
@@ -621,9 +744,21 @@ def main():
     if 'selected_place_id' not in st.session_state:
         st.session_state['selected_place_id'] = None
 
+    query_params = st.query_params
+    ext_place_name = query_params.get("place_name", None)
+    if ext_place_name and st.session_state['selected_place_id'] is None:
+        pid, matched_name, score = recommend_by_name(ext_place_name, sub1)
+        if pid:
+            st.session_state['selected_place_id'] = pid
+            st.toast(f"Matched '{ext_place_name}' → {matched_name} ({score:.0%})")
+            st.rerun()
+        else:
+            st.warning(f"Could not match '{ext_place_name}' to any place in the dataset.")
+
     if st.session_state['selected_place_id'] is None:
         render_hero()
-        place_names = sub1['place_name'].tolist()
+
+        place_names = sorted(sub1['place_name'].tolist())
         selected = st.selectbox(
             "Search for a Sri Lankan landmark",
             options=[""] + place_names, index=0,
@@ -650,8 +785,6 @@ def main():
 
         if st.button("⬅ Back to search", key="back_btn"):
             st.session_state['selected_place_id'] = None
-            st.session_state.pop('show_review_modal', None)
-            st.session_state.pop('show_rating_modal', None)
             st.rerun()
 
         render_place_results(place, sub1, model1, model2, model3)
