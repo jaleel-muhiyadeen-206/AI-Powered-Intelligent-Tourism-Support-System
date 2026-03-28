@@ -169,7 +169,7 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 @st.cache_data
 def load_data():
     """Load raw weather data - FAST because no processing"""
-    df = pd.read_csv('weather_data_lightweight_smart.csv',
+    df = pd.read_csv('C:\\Users\\User\PycharmProjects\DSGP\weather_prediction2\weather_data_lightweight_smart.csv',
                      usecols=['time', 'name', 'station_lat', 'station_lng',
                               'temperature_2m_max', 'temperature_2m_min',
                               'temperature_2m_mean', 'apparent_temperature_mean',
@@ -206,11 +206,11 @@ def get_location_info(df):
 def load_models():
     """Load pre-trained models - cached so only loads once"""
     m = {
-        'temperature_2m_mean': lgb.Booster(model_file='weather-model/lightgbm_model_temperature_2m_mean.txt'),
-        'precipitation_sum': lgb.Booster(model_file='weather-model/lightgbm_model_precipitation_sum.txt'),
-        'windspeed_10m_max': lgb.Booster(model_file='weather-model/lightgbm_model_windspeed_10m_max.txt')
+        'temperature_2m_mean': lgb.Booster(model_file=r'weather_prediction2\lightgbm_model_temperature_2m_mean.txt'),
+        'precipitation_sum': lgb.Booster(model_file=r'weather_prediction2\lightgbm_model_precipitation_sum.txt'),
+        'windspeed_10m_max': lgb.Booster(model_file=r'weather_prediction2\lightgbm_model_windspeed_10m_max.txt')
     }
-    return m, joblib.load('feature_columns.pkl')
+    return m, joblib.load('weather_prediction2/feature_columns.pkl')
 
 
 def create_features_for_location(df, location_name):
