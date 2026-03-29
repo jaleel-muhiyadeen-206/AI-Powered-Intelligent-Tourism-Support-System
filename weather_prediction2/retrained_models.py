@@ -7,7 +7,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 
 # Load data
-df = pd.read_csv('weather_prediction2/weather_data_lightweight_smart.csv',
+df = pd.read_csv('weather_prediction2\weather_data_lightweight_smart_with_landmarks.csv',
                  usecols=['time', 'name', 'station_lat', 'station_lng',
                           'temperature_2m_max', 'temperature_2m_min',
                           'temperature_2m_mean', 'apparent_temperature_mean',
