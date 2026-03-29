@@ -5,3 +5,4 @@ weather_prediction2/sri_lanka_heritage_1000[[:space:]](3).csv filter=lfs diff=lf
 weather_prediction2/SriLanka_Weather_Dataset.csvgit filter=lfs diff=lfs merge=lfs -text
 lfs filter=lfs diff=lfs merge=lfs -text
 weather_prediction2/SriLanka_Weather_Dataset.csv filter=lfs diff=lfs merge=lfs -text
+weather_prediction2/weather_data_lightweight_smart_with_landmarks.csv filter=lfs diff=lfs merge=lfs -text
