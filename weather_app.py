@@ -277,51 +277,214 @@ def create_features_for_location(df, location_name):
 
     return d
 
+# def predict_weather(location_name, target_date, df_raw, models, feature_cols):
+#     """
+#     Creates features on-demand for selected location only.
+#     Uses seasonal historical averages so future dates vary meaningfully.
+#     """
+#     # Create features only for this specific location
+#     df_enhanced = create_features_for_location(df_raw, location_name)
+
+#     if df_enhanced is None or len(df_enhanced) == 0:
+#         return None
+
+#     td = pd.to_datetime(target_date)
+
+#     # ── FIX: use same-month historical average instead of last row ──
+#     same_month = df_enhanced[df_enhanced['time'].dt.month == td.month]
+
+#     # Fallback to all data if no same-month rows exist
+#     base = same_month if len(same_month) > 0 else df_enhanced
+
+#     # Build feature dictionary from seasonal averages
+#     feat = {}
+#     for col in feature_cols:
+#         if col in base.columns:
+#             feat[col] = base[col].mean()   # ← seasonal average, not last row
+#         else:
+#             feat[col] = 0
+
+#     # Override with correct time features for the target date
+#     feat.update({
+#         'day':        td.day,
+#         'month':      td.month,
+#         'year':       td.year,
+#         'day_of_year': td.dayofyear,
+#         'day_of_week': td.dayofweek,
+#         'is_weekend': 1 if td.dayofweek >= 5 else 0,
+#         'month_sin':  np.sin(2 * np.pi * td.month / 12),
+#         'month_cos':  np.cos(2 * np.pi * td.month / 12),
+#         'day_sin':    np.sin(2 * np.pi * td.dayofyear / 365),
+#         'day_cos':    np.cos(2 * np.pi * td.dayofyear / 365),
+#         'hour':       12
+#     })
+
+#     pdf = pd.DataFrame([feat])
+
+#     out = {}
+#     for t, m in models.items():
+#         p = m.predict(pdf[feature_cols], num_iteration=m.best_iteration)[0]
+#         out[t] = round(p, 2)
+
+#     return out
+
+# def predict_weather(location_name, target_date, df_raw, models, feature_cols):
+#     """
+#     Creates features on-demand for selected location only
+#     """
+#     # Create features only for this specific location
+#     df_enhanced = create_features_for_location(df_raw, location_name)
+
+#     if df_enhanced is None or len(df_enhanced) == 0:
+#         return None
+
+#     td = pd.to_datetime(target_date)
+
+#     # Get most recent data for this location
+#     lat = df_enhanced.sort_values('time').iloc[-1:].copy()
+
+#     # Build feature dictionary
+#     feat = {col: (lat[col].values[0] if col in lat.columns else 0) for col in feature_cols}
+
+#     # Update time-based features for target date
+#     feat.update({
+#         'day': td.day,
+#         'month': td.month,
+#         'year': td.year,
+#         'day_of_year': td.dayofyear,
+#         'day_of_week': td.dayofweek,
+#         'is_weekend': 1 if td.dayofweek >= 5 else 0,
+#         'month_sin': np.sin(2 * np.pi * td.month / 12),
+#         'month_cos': np.cos(2 * np.pi * td.month / 12),
+#         'day_sin': np.sin(2 * np.pi * td.dayofyear / 365),
+#         'day_cos': np.cos(2 * np.pi * td.dayofyear / 365),
+#         'hour': 12
+#     })
+
+#     pdf = pd.DataFrame([feat])
+
+#     # Make predictions
+#     out = {}
+#     for t, m in models.items():
+#         p = m.predict(pdf[feature_cols], num_iteration=m.best_iteration)[0]
+#         # FIXED: NO expm1 transformation - model outputs correct values
+#         out[t] = round(p, 2)
+
+#     return out
 
 def predict_weather(location_name, target_date, df_raw, models, feature_cols):
     """
-    Creates features on-demand for selected location only
+    Advanced prediction using:
+    - Same month + nearby days historical pattern matching
+    - Location-specific climate fingerprint
+    - Weighted recent trends + seasonal normals
     """
-    # Create features only for this specific location
     df_enhanced = create_features_for_location(df_raw, location_name)
 
     if df_enhanced is None or len(df_enhanced) == 0:
         return None
 
     td = pd.to_datetime(target_date)
+    df_enhanced = df_enhanced.sort_values('time').reset_index(drop=True)
 
-    # Get most recent data for this location
-    lat = df_enhanced.sort_values('time').iloc[-1:].copy()
+    # ── 1. SAME MONTH + NEARBY DAYS WINDOW (±15 days across all years) ──
+    # Captures seasonal pattern for that specific time of year
+    target_doy = td.dayofyear
+    df_enhanced['doy'] = df_enhanced['time'].dt.dayofyear
 
-    # Build feature dictionary
-    feat = {col: (lat[col].values[0] if col in lat.columns else 0) for col in feature_cols}
+    # Circular day-of-year distance (handles year boundary e.g. Dec→Jan)
+    df_enhanced['doy_dist'] = df_enhanced['doy'].apply(
+        lambda d: min(abs(d - target_doy), 365 - abs(d - target_doy))
+    )
 
-    # Update time-based features for target date
+    seasonal_window = df_enhanced[df_enhanced['doy_dist'] <= 15]
+    if len(seasonal_window) < 5:
+        seasonal_window = df_enhanced[df_enhanced['doy_dist'] <= 30]
+    if len(seasonal_window) < 5:
+        seasonal_window = df_enhanced  # final fallback
+
+    # ── 2. RECENT TREND (last 60 days of data) ──
+    # Captures the location's current weather momentum
+    recent_cutoff = df_enhanced['time'].max() - pd.Timedelta(days=60)
+    recent_data = df_enhanced[df_enhanced['time'] >= recent_cutoff]
+    if len(recent_data) < 3:
+        recent_data = df_enhanced.tail(10)
+
+    # ── 3. WEIGHTED BLEND: 60% seasonal + 40% recent trend ──
+    # Seasonal tells us "what's normal for this time of year at this location"
+    # Recent trend tells us "what's the current state of this location"
+    feat = {}
+    for col in feature_cols:
+        if col in df_enhanced.columns:
+            seasonal_val = seasonal_window[col].mean()
+            recent_val   = recent_data[col].mean()
+
+            # Weighted blend
+            feat[col] = (0.6 * seasonal_val) + (0.4 * recent_val)
+        else:
+            feat[col] = 0
+
+    # ── 4. LOCATION-SPECIFIC CLIMATE FINGERPRINT ──
+    # Inject actual historical stats for this exact location
+    # so two locations in same district still differ
+    loc_all = df_enhanced  # all years for this location
+
+    # Temperature fingerprint: actual historical mean for this month
+    month_data = loc_all[loc_all['time'].dt.month == td.month]
+    if len(month_data) > 0:
+        feat['apparent_temperature_mean'] = month_data['apparent_temperature_mean'].mean()
+        feat['temperature_2m_max']        = month_data['temperature_2m_max'].mean()
+        feat['temperature_2m_min']        = month_data['temperature_2m_min'].mean()
+        feat['temp_range']                = month_data['temp_range'].mean()
+        feat['apparent_diff']             = month_data['apparent_diff'].mean()
+
+    # Rain fingerprint: actual historical rain for this month at this location
+    if len(month_data) > 0:
+        feat['rain_sum']              = month_data['rain_sum'].mean()
+        feat['precipitation_hours']   = month_data['precipitation_hours'].mean()
+        feat['rain_intensity']        = month_data['rain_intensity'].mean()
+        feat['rain_lag_1']            = month_data['rain_sum'].mean()
+
+    # Wind fingerprint: actual historical wind for this month
+    if len(month_data) > 0:
+        feat['wind_log']        = month_data['wind_log'].mean() if 'wind_log' in month_data else 0
+        feat['wind_rolling_3']  = month_data['wind_rolling_3'].mean() if 'wind_rolling_3' in month_data else 0
+        feat['wind_rolling_7']  = month_data['wind_rolling_7'].mean() if 'wind_rolling_7' in month_data else 0
+
+    # Lag features: use same-month historical lags
+    # (simulates "what was weather like a few days before this date historically")
+    if len(month_data) > 0:
+        feat['temp_lag_1']      = month_data['temperature_2m_mean'].mean()
+        feat['temp_lag_7']      = month_data['temperature_2m_mean'].mean()
+        feat['wind_lag_1']      = month_data['windspeed_10m_max'].mean()
+        feat['wind_lag_7']      = month_data['windspeed_10m_max'].mean()
+        feat['temp_rolling_3']  = month_data['temperature_2m_mean'].mean()
+        feat['temp_rolling_7']  = month_data['temperature_2m_mean'].mean()
+
+    # ── 5. EXACT TIME FEATURES FOR TARGET DATE ──
     feat.update({
-        'day': td.day,
-        'month': td.month,
-        'year': td.year,
+        'day':         td.day,
+        'month':       td.month,
+        'year':        td.year,
         'day_of_year': td.dayofyear,
         'day_of_week': td.dayofweek,
-        'is_weekend': 1 if td.dayofweek >= 5 else 0,
-        'month_sin': np.sin(2 * np.pi * td.month / 12),
-        'month_cos': np.cos(2 * np.pi * td.month / 12),
-        'day_sin': np.sin(2 * np.pi * td.dayofyear / 365),
-        'day_cos': np.cos(2 * np.pi * td.dayofyear / 365),
-        'hour': 12
+        'is_weekend':  1 if td.dayofweek >= 5 else 0,
+        'month_sin':   np.sin(2 * np.pi * td.month / 12),
+        'month_cos':   np.cos(2 * np.pi * td.month / 12),
+        'day_sin':     np.sin(2 * np.pi * td.dayofyear / 365),
+        'day_cos':     np.cos(2 * np.pi * td.dayofyear / 365),
+        'hour':        12
     })
 
     pdf = pd.DataFrame([feat])
 
-    # Make predictions
+    # ── 6. PREDICT ──
     out = {}
     for t, m in models.items():
         p = m.predict(pdf[feature_cols], num_iteration=m.best_iteration)[0]
-        # FIXED: NO expm1 transformation - model outputs correct values
         out[t] = round(p, 2)
 
     return out
-
 
 def score_weather(temp, rain, wind):
     """Calculate 0-100 travel score based on weather conditions"""
