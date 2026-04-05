@@ -98,7 +98,7 @@ def are_districts_adjacent(d1: str, d2: str) -> bool:
     return d2 in DISTRICT_ADJACENCY.get(d1, set())
 
 
-def _haversine(lat1, lon1, lat2, lon2):
+def _haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     from math import radians, sin, cos, sqrt, atan2
     R = 6371
     lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
