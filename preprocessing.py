@@ -294,7 +294,7 @@ class BERTReviewSelector:
     def __init__(self, sentiment_analyser):
         self.analyser = sentiment_analyser
 
-    def select_best_review(self, reviews):
+    def select_best_review(self, reviews: list) -> str:
         default = "A hidden gem waiting to be explored."
         if not reviews:
             return default
