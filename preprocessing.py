@@ -256,7 +256,7 @@ class KaggleReviewEnricher:
         print(f"  Loaded {len(self.kaggle_df)} Kaggle reviews for "
               f"{self.kaggle_df['Destination'].nunique()} destinations")
 
-    def match_places(self, place_names, threshold=0.70):
+    def match_places(self, place_names: list, threshold: float=0.70):
         if not self.loaded:
             return {}
         kaggle_names = list(self.kaggle_df['Destination'].unique())
