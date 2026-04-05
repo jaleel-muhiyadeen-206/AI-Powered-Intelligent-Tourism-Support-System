@@ -529,7 +529,7 @@ def load_and_preprocess_all(data_dir: str='data', kaggle_csv: str='Destination R
     sub2 = preprocess_submodel_2(sub2_raw, sentiment_analyser, kaggle_enricher, review_selector)
     acc = preprocess_nearby_accommodation(acc_raw, sentiment_analyser)
 
-    print("\n" + "=" * 80)
+    print("\n" + "=" * 80)  # Completion demarcation frame
     print("PREPROCESSING COMPLETE")
     print("=" * 80)
 
