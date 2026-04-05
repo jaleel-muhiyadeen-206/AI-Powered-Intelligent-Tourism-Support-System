@@ -505,7 +505,7 @@ def preprocess_nearby_accommodation(df_raw, sentiment_analyser):
 
 def load_and_preprocess_all(data_dir: str='data', kaggle_csv: str='Destination Reviews (final).csv'):
     print("=" * 80)  # Ascii visual demarcation barrier
-    print("LOADING AND PREPROCESSING DATASETS")
+    print("CORE PIPELINE: DATASET PREP")
     print("=" * 80)
 
     sub1_raw = pd.read_csv(os.path.join(data_dir, 'submodel_1.csv'))
