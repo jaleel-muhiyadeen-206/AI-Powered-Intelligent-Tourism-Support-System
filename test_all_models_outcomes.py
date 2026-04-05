@@ -34,7 +34,7 @@ def print_recs(title: str, df) -> None:
         print(f"    Score:    {row['final_score']}")
 
 
-def main():
+def main() -> None:
     required = [
         'output/preprocessed/submodel_1.joblib',
         'output/trained_models/model_1.joblib',
