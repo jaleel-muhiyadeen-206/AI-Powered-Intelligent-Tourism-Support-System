@@ -476,7 +476,7 @@ def preprocess_nearby_accommodation(df_raw, sentiment_analyser):
     df['service_image_url'] = df['service_image_url'].fillna('https://via.placeholder.com/300x200?text=No+Image')
     df['service_avg_rating'] = df['service_avg_rating'].fillna(0.0)
 
-    print("  Computing BERT sentiment for service reviews...")
+    print("  [ML] Resolving sequential deep sentiment abstractions...")
     df['service_sentiment'] = sentiment_analyser.analyse_batch(df['service_display_review'].tolist(), batch_size=16)
 
     budget_mapping = {
