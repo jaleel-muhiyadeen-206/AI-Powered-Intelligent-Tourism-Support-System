@@ -14,8 +14,8 @@ import tempfile
 # -----------------------------------------------------------------------------
 # CONFIGURATION
 # -----------------------------------------------------------------------------
-MODEL_PATH = 'FineTuned01-EfficientNetB0_CNN_Model.h5'
-CLASS_NAMES_PATH = 'class_names.json'
+MODEL_PATH = 'landmark_recognition/FineTuned01-EfficientNetB0_CNN_Model.h5'
+CLASS_NAMES_PATH = 'landmark_recognition/class_names.json'
 CONFIDENCE_THRESHOLD = 0.65
 
 # -----------------------------------------------------------------------------
