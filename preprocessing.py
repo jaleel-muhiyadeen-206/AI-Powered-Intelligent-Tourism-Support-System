@@ -92,7 +92,7 @@ DISTRICT_ADJACENCY = {
 }
 
 
-def are_districts_adjacent(d1, d2):
+def are_districts_adjacent(d1: str, d2: str) -> bool:
     if d1 == d2:
         return True
     return d2 in DISTRICT_ADJACENCY.get(d1, set())
