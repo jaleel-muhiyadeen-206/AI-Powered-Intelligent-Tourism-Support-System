@@ -309,7 +309,7 @@ class BERTReviewSelector:
         return scored[0][0]
 
 
-def extract_primary_type(place_type_str):
+def extract_primary_type(place_type_str: str) -> str:
     if pd.isna(place_type_str):
         return 'General Attraction'
     types = [t.strip() for t in str(place_type_str).split(',')]
