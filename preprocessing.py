@@ -345,7 +345,7 @@ def preprocess_submodel_1(df_raw, sentiment_analyser, kaggle_enricher=None,
     df['place_category'] = df['place_type'].apply(extract_primary_type)
     df['combined_features'] = df['place_category'] + ' ' + df['description'] + ' ' + df['district']
 
-    print("  Computing BERT sentiment scores...")
+    print("  [ML] Computing BERT sentiment tracking heuristic...")
     df['sentiment_score'] = sentiment_analyser.analyse_batch(df['display_review'].tolist(), batch_size=16)
 
     if kaggle_enricher is not None and kaggle_enricher.loaded:
