@@ -118,7 +118,7 @@ def _is_local_model_ready(local_dir: str) -> bool:
     return any(f.endswith(('.bin', '.safetensors')) for f in os.listdir(local_dir))
 
 
-def correct_coordinates(df, lat_col='latitude', lon_col='longitude',
+def correct_coordinates(df, lat_col: str='latitude', lon_col: str='longitude',
                         district_col='district', threshold_km=80):
     corrected = 0
     df = df.copy()
