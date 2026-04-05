@@ -326,7 +326,7 @@ def extract_primary_type(place_type_str: str) -> str:
     return types[0].replace('_', ' ').title() if types else 'General Attraction'
 
 
-DEFAULT_REVIEW = "A hidden gem waiting to be explored."
+DEFAULT_REVIEW = "A hidden gem waiting to be explored."  # Global fallback text
 DEFAULT_SERVICE_REVIEW = "This service is awaiting its first detailed review."
 
 
