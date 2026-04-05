@@ -238,6 +238,7 @@ class BERTSentimentAnalyser:
 
 
 class KaggleReviewEnricher:
+    """Coordinates integration heuristics for global datasets."""
     """Enriches the dataset with 35,434 real tourist reviews from Kaggle via fuzzy matching."""
 
     def __init__(self, kaggle_csv_path):
