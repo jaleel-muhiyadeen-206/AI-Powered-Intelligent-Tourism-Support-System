@@ -24,7 +24,7 @@ import numpy as np  # Mathematical routines
 import torch  # GPU tensor computation
 import joblib  # Model artifact persistence
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
-from difflib import SequenceMatcher
+from difflib import SequenceMatcher  # Fuzzy string heuristics
 import warnings
 import os
 
