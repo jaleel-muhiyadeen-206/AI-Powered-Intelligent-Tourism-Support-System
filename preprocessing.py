@@ -389,7 +389,7 @@ def preprocess_submodel_1(df_raw, sentiment_analyser, kaggle_enricher=None,
 
 def preprocess_submodel_2(df_raw, sentiment_analyser, kaggle_enricher=None,
                           review_selector=None):
-    print("\n[2/3] Preprocessing Submodel 2...")
+    print("\n[INFO] [2/3] Preprocessing Submodel 2 matrix pipeline...")
     df = df_raw.copy()
     df = correct_coordinates(df)
 
