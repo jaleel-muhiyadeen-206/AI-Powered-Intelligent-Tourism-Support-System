@@ -9,7 +9,7 @@ Usage:
     python download_bert_model.py
 """
 
-import os
+import os  # Standard underlying system commands
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 MODEL_NAME = "nlptown/bert-base-multilingual-uncased-sentiment"
