@@ -66,7 +66,7 @@ VEO_MODEL        = "veo-3.1-fast-generate-preview"
 OLLAMA_MODEL     = "llama3.1"
 
 # ── All paths resolved relative to THIS file's directory ──────────────────────
-# This ensures the pipeline works correctly whether called from app.py (parent)
+# This ensures the pipeline works correctly whether called from landmark_recognition_app.py (parent)
 # or run directly from the digital_story_teller/ folder.
 _PIPELINE_DIR    = os.path.dirname(os.path.abspath(__file__))
 
