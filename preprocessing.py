@@ -503,7 +503,7 @@ def preprocess_nearby_accommodation(df_raw, sentiment_analyser):
     return df
 
 
-def load_and_preprocess_all(data_dir='data', kaggle_csv='Destination Reviews (final).csv'):
+def load_and_preprocess_all(data_dir: str='data', kaggle_csv: str='Destination Reviews (final).csv'):
     print("=" * 80)
     print("LOADING AND PREPROCESSING DATASETS")
     print("=" * 80)
