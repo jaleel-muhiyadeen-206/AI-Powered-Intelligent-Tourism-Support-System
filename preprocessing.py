@@ -150,7 +150,7 @@ class BERTSentimentAnalyser:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self._loaded = False
 
-    def load(self):
+    def load(self) -> None:
         if self._loaded:
             return
 
