@@ -12,6 +12,7 @@ from models.model_3_nearby_essentials import Model3_NearbyEssentials
 
 
 def print_recs(title: str, df) -> None:
+    """Renders model recommendations to standard output stream."""
     print(f"\n  {title}")
     print("  " + "-" * 70)
     if df.empty:
