@@ -3,7 +3,7 @@
 from math import radians, sin, cos, sqrt, atan2
 
 
-def haversine_distance(lat1, lon1, lat2, lon2):
+def haversine_distance(lat1: float, lon1, lat2, lon2):
     """
     Calculate the great-circle distance between two points on Earth
     using the Haversine formula.
