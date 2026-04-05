@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+.env
+models/bert_sentiment/
+models/bert_cache/
+models/sbert_local/
+models/sbert_cache/
+
+
+.idea/
+*.safetensors
+recommendation-model/models/bert_cache/
+recommendation-model/models/sbert_cache/
+recommendation-model/models/bert_sentiment/
+recommendation-model/models/sbert_local/
