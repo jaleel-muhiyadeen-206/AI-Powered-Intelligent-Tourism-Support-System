@@ -65,7 +65,7 @@ def main() -> None:
     model3 = Model3_NearbyEssentials(pd.DataFrame(), pd.DataFrame())
     model3.load('output/trained_models/model_3.joblib')
 
-    search_term = "Sigiriya"
+    search_term = "Sigiriya"  # Hardcoded destination test payload
     matches = sub1[sub1['place_name'].str.contains(search_term, case=False, na=False)]
 
     if matches.empty:
