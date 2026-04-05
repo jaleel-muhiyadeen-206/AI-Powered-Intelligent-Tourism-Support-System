@@ -30,7 +30,7 @@ import os  # Underlying OS integration paths
 
 warnings.filterwarnings('ignore')  # Ensure sterile output logs
 
-PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))  # Anchor origin
 LOCAL_BERT_DIR = os.path.join(PROJECT_DIR, 'models', 'bert_sentiment')
 BERT_CACHE_DIR = os.path.join(PROJECT_DIR, 'models', 'bert_cache')
 BERT_MODEL_NAME = "nlptown/bert-base-multilingual-uncased-sentiment"
