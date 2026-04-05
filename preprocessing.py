@@ -530,7 +530,7 @@ def load_and_preprocess_all(data_dir: str='data', kaggle_csv: str='Destination R
     acc = preprocess_nearby_accommodation(acc_raw, sentiment_analyser)
 
     print("\n" + "=" * 80)  # Completion demarcation frame
-    print("PREPROCESSING COMPLETE")
+    print("CORE PIPELINE: LIFECYCLE COMPLETE")
     print("=" * 80)
 
     return sub1, sub2, acc
