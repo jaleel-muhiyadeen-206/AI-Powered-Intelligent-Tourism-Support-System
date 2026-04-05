@@ -408,7 +408,7 @@ def preprocess_submodel_2(df_raw, sentiment_analyser, kaggle_enricher=None,
 
     df['place_category'] = df['place_type'].apply(extract_primary_type)
 
-    print("  Computing BERT sentiment for all review columns...")
+    print("  [ML] Aggregating sequential sentiment density on grid...")
     df['sentiment_score'] = sentiment_analyser.analyse_batch(df['display_review'].tolist(), batch_size=16)
 
     for col in review_cols:
