@@ -15,7 +15,7 @@ def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> fl
     Returns:
         float: distance in kilometres
     """
-    R = 6371
+    EARTH_RADIUS_KM = 6371
 
     lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
 
