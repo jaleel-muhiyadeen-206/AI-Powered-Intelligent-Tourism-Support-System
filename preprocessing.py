@@ -469,7 +469,7 @@ def preprocess_submodel_2(df_raw, sentiment_analyser, kaggle_enricher=None,
 
 
 def preprocess_nearby_accommodation(df_raw, sentiment_analyser):
-    print("\n[3/3] Preprocessing Nearby Accommodation...")
+    print("\n[INFO] [3/3] Normalizing accommodation proximity endpoints...")
     df = df_raw.copy()
 
     df['service_display_review'] = df['service_display_review'].fillna(DEFAULT_SERVICE_REVIEW)
