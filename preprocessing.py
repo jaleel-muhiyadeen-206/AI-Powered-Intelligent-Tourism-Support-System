@@ -333,7 +333,7 @@ DEFAULT_SERVICE_REVIEW = "This service is awaiting its first detailed review."
 
 def preprocess_submodel_1(df_raw, sentiment_analyser, kaggle_enricher=None,
                           review_selector=None):
-    print("\n[1/3] Preprocessing Submodel 1...")
+    print("\n[INFO] [1/3] Preprocessing Submodel 1 pipeline...")
     df = df_raw.copy()
     df = correct_coordinates(df)
 
