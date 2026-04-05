@@ -15,6 +15,7 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 MODEL_NAME = "nlptown/bert-base-multilingual-uncased-sentiment"
 # Target filesystem storage root
 LOCAL_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models', 'bert_sentiment')
+# Intermediate volatile caching tier
 CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models', 'bert_cache')
 
 
