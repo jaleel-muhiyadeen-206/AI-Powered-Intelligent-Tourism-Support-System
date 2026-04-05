@@ -1,0 +1,37 @@
+[
+  {
+    "scene_num": 1,
+    "video_prompt": "A breathtaking aerial shot of the temple complex at dawn, with warm golden light illuminating the lush greenery and the majestic cave entrance rising from the earth. The camera pans down slowly, revealing the intricate stone carvings on the fa\u00e7ade as it transitions into a panoramic view of the surrounding landscape.",
+    "audio_narration": "\"Dramatic aerial shots reveal the breathtaking grandeur of Dambulla Cave Temple in Sri Lanka's central highlands.\""
+  },
+  {
+    "scene_num": 2,
+    "video_prompt": "A dramatic close-up of an ancient fresco depicting King Walagamba, with vibrant colours and delicate brushstrokes bringing history to life. The camera lingers on the intricate details, allowing viewers to absorb the majesty of this centuries-old artwork.",
+    "audio_narration": "\"This ancient cave temple complex was a refuge for King Walagamba in the 1st century BC, preserving his story for centuries.\""
+  },
+  {
+    "scene_num": 3,
+    "video_prompt": "A captivating shot of the iconic Buddha statues standing tall within the majestic cave, bathed in soft, ethereal light that accentuates their serene beauty. The camera captures the intricate carvings and details on each statue, highlighting their significance as sacred objects.",
+    "audio_narration": "\"Over 150 Buddha statues stand sentinel within Dambulla's caves, a testament to the devotion of generations past.\""
+  },
+  {
+    "scene_num": 4,
+    "video_prompt": "A poignant moment captured within one of the cave temples, where devotees are seen paying respects at an ancient shrine, surrounded by stunning murals depicting Buddhist mythology. Soft focus and warm colours create a sense of reverence and connection.",
+    "audio_narration": "\"Dambulla Cave Temple is a sacred space, revered for its centuries-old murals and statues that evoke spirituality in all who visit.\""
+  },
+  {
+    "scene_num": 5,
+    "video_prompt": "A stunning close-up of an intricate mural painting within the cave temple, showcasing delicate brushstrokes and vivid colours as it depicts the life of Buddha. The camera captures every detail with precision and care.",
+    "audio_narration": "\"Dramatic frescoes cover over 2,100 square meters, revealing epic stories from Buddhist mythology in exquisite detail.\""
+  },
+  {
+    "scene_num": 6,
+    "video_prompt": "A vibrant shot of tourists exploring the temple complex, admiring the artwork and taking in the history as they wander through the caves. The camera captures their smiles and sense of wonder.",
+    "audio_narration": "\"Today, Dambulla Cave Temple welcomes visitors from around the world, who marvel at its beauty and significance.\""
+  },
+  {
+    "scene_num": 7,
+    "video_prompt": "A breathtaking closing shot of the temple complex at sunset, with warm hues of gold and orange dancing across the landscape as the camera pans up to reveal the majestic cave entrance rising above. Soft focus and subtle movement evoke a sense of peace and wonder.",
+    "audio_narration": "\"As the sun sets over Dambulla Cave Temple, we are reminded that this ancient site is a timeless treasure waiting to be discovered.\""
+  }
+]

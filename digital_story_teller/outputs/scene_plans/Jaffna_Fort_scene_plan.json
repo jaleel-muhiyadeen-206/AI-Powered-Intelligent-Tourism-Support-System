@@ -1,0 +1,37 @@
+[
+  {
+    "scene_num": 1,
+    "video_prompt": "Aerial drone shot of Jaffna Fort at sunset, with golden light and dramatic shadows, framed by lush greenery and turquoise ocean in the background",
+    "audio_narration": "\"In northern Sri Lanka stands a fortress born from ancient trade routes.\""
+  },
+  {
+    "scene_num": 2,
+    "video_prompt": "Close-up shot of an old stone inscription on the fort's wall, with faded Portuguese letters and intricate carvings in warm sepia tones, lit softly to reveal historical texture",
+    "audio_narration": "\"The Portuguese established this stronghold in 1618, marking their foothold in Asia firmly.\""
+  },
+  {
+    "scene_num": 3,
+    "video_prompt": "Panoramic view from atop one of the bastions, showcasing the fort's star-shaped design, with moats and watchtowers glistening in morning dew under a bright blue sky",
+    "audio_narration": "\"The Dutch expanded its walls in 1680, creating an imposing Vauban-style fortress.\""
+  },
+  {
+    "scene_num": 4,
+    "video_prompt": "Soft focus shot of devotees visiting the Queens House, now a sacred space for prayer, surrounded by tranquil gardens and serene statues, bathed in gentle morning light",
+    "audio_narration": "\"For centuries, this sacred site has nurtured faith, community, and resilience.\""
+  },
+  {
+    "scene_num": 5,
+    "video_prompt": "Close-up shot of intricate coral stone carvings on the fort's fa\u00e7ade, with delicate lace-like patterns, warm golden tones, and a hint of moisture from the ocean breeze",
+    "audio_narration": "\"Unveiling the secrets of its construction reveals an intricate dance between human ingenuity and natural beauty.\""
+  },
+  {
+    "scene_num": 6,
+    "video_prompt": "Wide shot of tourists strolling through the restored Dutch Reformed Church, admiring historic stained-glass windows, under soft diffused light in a warm atmosphere of reverence",
+    "audio_narration": "\"Today, visitors from around the world come to marvel at its storied past and peaceful present.\""
+  },
+  {
+    "scene_num": 7,
+    "video_prompt": "Dramatic final shot of Jaffna Fort at twilight, bathed in ethereal golden hues, reflecting on calm waters, with a faint hint of mist rising from the surrounding landscape",
+    "audio_narration": "\"Let us preserve this testament to colonial heritage, where history meets beauty, and memories are made.\""
+  }
+]

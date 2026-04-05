@@ -1,0 +1,37 @@
+[
+  {
+    "scene_num": 1,
+    "video_prompt": "A breathtaking aerial shot of Nine Arches Bridge at sunrise, bathed in warm golden light, with nine majestic arches spanning across a lush valley, camera positioned high above to emphasize its grandeur and significance.",
+    "audio_narration": "\"Standing tall amidst Sri Lanka's hill country, an engineering marvel beckons exploration.\""
+  },
+  {
+    "scene_num": 2,
+    "video_prompt": "A close-up of old photographs and documents from the colonial era, faded and worn, with a gentle focus on the name \"P.K. Appuhami\" etched in one corner, soft pastel colors evoking nostalgia.",
+    "audio_narration": "\"Built during World War I steel shortages, P.K. Appuhami's ingenuity shines through this testament to human resilience.\""
+  },
+  {
+    "scene_num": 3,
+    "video_prompt": "A dramatic close-up of one of the nine arches, showcasing its intricate stonework and precision engineering, with warm sunlight dancing across the texture, camera positioned low to emphasize its grandeur.",
+    "audio_narration": "\"Nine majestic arches stretch across a valley, an architectural wonder born from human hands.\""
+  },
+  {
+    "scene_num": 4,
+    "video_prompt": "A serene shot of locals walking through the bridge at dawn, praying and taking in the views, with soft morning light casting a peaceful ambiance, camera positioned to capture their reverence.",
+    "audio_narration": "\"A symbol of hope and unity, this iconic bridge weaves spirituality into its very fabric.\""
+  },
+  {
+    "scene_num": 5,
+    "video_prompt": "A stunning time-lapse sequence showcasing the nine arches at sunset, with vibrant colors dancing across the sky, highlighting the structure's unique design and grandeur.",
+    "audio_narration": "\"Completed without steel, a testament to human innovation, standing tall at over three thousand feet.\""
+  },
+  {
+    "scene_num": 6,
+    "video_prompt": "A bustling shot of modern-day tourists taking photos on the bridge, laughing and admiring its beauty, with bright sunlight casting long shadows across the landscape, camera positioned to capture their joy.",
+    "audio_narration": "\"Today, Nine Arches Bridge welcomes visitors from around the world, a living piece of history.\""
+  },
+  {
+    "scene_num": 7,
+    "video_prompt": "A majestic closing shot of the bridge at dusk, bathed in warm golden light, with nine arches silhouetted against a vibrant orange sky, camera positioned high above to emphasize its timelessness.",
+    "audio_narration": "\"As the sun dips below the horizon, Nine Arches Bridge stands eternally proud.\""
+  }
+]

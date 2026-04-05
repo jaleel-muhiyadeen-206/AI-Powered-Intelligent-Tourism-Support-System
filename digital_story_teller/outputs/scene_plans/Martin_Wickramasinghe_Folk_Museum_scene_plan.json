@@ -1,0 +1,37 @@
+[
+  {
+    "scene_num": 1,
+    "video_prompt": "A sweeping aerial shot of the Martin Wickramasinghe Folk Museum's sprawling gardens, with a vibrant blue sky and lush greenery below. The camera pans down to reveal the museum's fa\u00e7ade, adorned with intricate wooden carvings and a majestic gateway. Soft focus is applied to convey the sense of grandeur.",
+    "audio_narration": "\"Welcome to the Martin Wickramasinghe Folk Museum, a treasure trove of Sri Lankan folk culture.\""
+  },
+  {
+    "scene_num": 2,
+    "video_prompt": "A warm, golden light illuminates the interior of the museum's main hall, where traditional artifacts and crafts are displayed on wooden shelves and pedestals. The camera captures a close-up shot of an antique loom, its intricate threads glinting in the soft light. The background is blurred to emphasize the focus on the loom.",
+    "audio_narration": "\"This magnificent museum is situated within the ancestral home of Sri Lanka's greatest writer, Martin Wickramasinghe.\""
+  },
+  {
+    "scene_num": 3,
+    "video_prompt": "The camera zooms in on a stunning mural depicting rural life in Southern Sri Lanka, its vibrant colors and dynamic composition transporting viewers to a bygone era. Soft focus is applied to convey the sense of timelessness.",
+    "audio_narration": "\"The museum's collections showcase the rich cultural heritage of the indigenous Southern coastal people.\""
+  },
+  {
+    "scene_num": 4,
+    "video_prompt": "A serene and contemplative mood is established with a shot of the museum gardens at dawn, where the ashes of Martin Wickramasinghe and his wife are interred beneath a majestic tree. The camera pans up to reveal the tranquil surroundings.",
+    "audio_narration": "\"This sacred space pays tribute to the writer's enduring legacy and cultural significance.\""
+  },
+  {
+    "scene_num": 5,
+    "video_prompt": "A dramatic close-up shot highlights an antique printing press, its wooden components gleaming with age and character. The lighting is soft, yet accentuates the intricate details of the press.",
+    "audio_narration": "\"The museum features rare artifacts related to rural life and folklore described in Martin Wickramasinghe's timeless novels.\""
+  },
+  {
+    "scene_num": 6,
+    "video_prompt": "Visitors stroll through the museum gardens, admiring the traditional architecture and enjoying the serene atmosphere. The camera captures a warm shot of a group gathered around an antique loom, engaged in conversation.",
+    "audio_narration": "\"Today, visitors from around the world come to experience the rich cultural heritage of Sri Lanka at this revered institution.\""
+  },
+  {
+    "scene_num": 7,
+    "video_prompt": "As the sun sets over the museum's gardens, the camera pans out to reveal a breathtaking shot of the sprawling complex, bathed in golden light. Soft focus is applied to convey the sense of peace and tranquility.",
+    "audio_narration": "\"Join us on a journey through time and culture at the Martin Wickramasinghe Folk Museum \u2013 a testament to Sri Lanka's enduring spirit.\""
+  }
+]

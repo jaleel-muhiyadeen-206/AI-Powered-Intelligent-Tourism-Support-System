@@ -1,0 +1,37 @@
+[
+  {
+    "scene_num": 1,
+    "video_prompt": "Aerial footage of the British Garrison Cemetery's tranquil landscape unfolds with a majestic sweep from above, capturing lush greenery and meticulously arranged graves amidst misty Kandy hills. Soft morning sunlight bathes the scene in warm, golden tones, casting long shadows across the serene grounds. The camera pans slowly, providing an expansive view of the cemetery's grandeur.",
+    "audio_narration": "\"Amidst Sri Lanka's mist-shrouded hills stands a poignant testament to British colonial endeavour.\""
+  },
+  {
+    "scene_num": 2,
+    "video_prompt": "A sepia-toned photograph from the archives comes to life as the camera zooms in on a faded inscription: \"Erected 1817.\" The image shimmers, and the viewer is transported back in time. Faded letters reveal stories of those who came, fought, and died in this unforgiving land.",
+    "audio_narration": "\"Established in 1817, the British Garrison Cemetery records a sombre chapter of empire-building's human cost.\""
+  },
+  {
+    "scene_num": 3,
+    "video_prompt": "The camera focuses on an intricately carved headstone, its weathered stone bearing testament to the craftsmanship of a bygone era. Delicate lichen and moss soften the granite's rugged surface, as sunlight casts intricate patterns across the intricate carvings.",
+    "audio_narration": "\"Notable burials like Sir John D'Oyly's tell a tale of power struggles and lost lives.\""
+  },
+  {
+    "scene_num": 4,
+    "video_prompt": "As twilight descends upon the cemetery, soft candles and lanterns flicker to life, casting a warm, golden glow over the gravestones. A gentle breeze stirs the leaves of nearby trees, creating an eerie yet poignant ambiance.",
+    "audio_narration": "\"For locals and visitors alike, this sacred space holds deep cultural significance.\""
+  },
+  {
+    "scene_num": 5,
+    "video_prompt": "The camera zooms in on a grave bearing the inscription 'died from Cholera.' A slow-motion effect heightens the emotional impact as water droplets form on the stone, echoing the relentless march of time.",
+    "audio_narration": "\"Many lives were claimed by tropical diseases like malaria and cholera.\""
+  },
+  {
+    "scene_num": 6,
+    "video_prompt": "Modern-day visitors stroll through the cemetery's tranquil grounds, some paying their respects with flowers or candles at specific graves. A group of local volunteers busily tend to the graves, adding a sense of continuity to this living history.",
+    "audio_narration": "\"Today, tourists from around the world visit and pay homage to the fallen.\""
+  },
+  {
+    "scene_num": 7,
+    "video_prompt": "The final shot pans out, capturing the British Garrison Cemetery's serene beauty as the sun dips below the horizon. Soft focus, muted colours, and a gentle fade to black evoke a sense of reverence and contemplation.",
+    "audio_narration": "\"As we reflect on this chapter in history, let us remember the human cost of empire-building.\""
+  }
+]

@@ -1,0 +1,37 @@
+[
+  {
+    "scene_num": 1,
+    "video_prompt": "The camera soars over the golden plains of Sri Lanka, sweeping towards a majestic aerial view of the Bundala Ancient Shell Middens. Aerial drone captures the sprawling landscape with intricate shell mounds in vibrant earth tones and sun-drenched grasslands beneath. The early morning sun casts long shadows across the terrain, emphasizing the vastness of this prehistoric site. In the distance, a flock of migratory birds can be seen flying over the wetland. Warm orange hues dominate the color palette as the camera glides effortlessly towards the archaeological treasure below.",
+    "audio_narration": "\"Bundala's ancient shell middens hold secrets of earliest modern human settlements in the Indian Ocean region.\""
+  },
+  {
+    "scene_num": 2,
+    "video_prompt": "Close-up footage of an archaeologist carefully brushing away dirt and debris from a weathered stone tool, showcasing intricate carvings and wear patterns. Soft natural light highlights the earthy tones of the artifact as it is gently revealed. The camera captures the delicate process with macro shots, focusing on the textures and details that tell a story of human ingenuity. A subtle background of rustling palm fronds provides ambient sound.",
+    "audio_narration": "\"These ancient tools speak to us of a civilization that coexisted with nature in harmony.\""
+  },
+  {
+    "scene_num": 3,
+    "video_prompt": "The camera zooms in on an impressive shell mound, displaying its layered structure and towering height. Geologists' measuring equipment can be seen alongside the mounds, emphasizing the significance of this site as a geological record of sea levels past. Watercolor-like colors \u2013 from dusty pink to turquoise \u2013 dominate the visual landscape, capturing the unique hue of the shells and earth. The sound design subtly incorporates gentle wind rustling through leaves.",
+    "audio_narration": "\"These massive shell mounds stand testament to the ingenuity of prehistoric humans in adapting to their environment.\""
+  },
+  {
+    "scene_num": 4,
+    "video_prompt": "A serene shot of a Buddhist monk walking silently towards one of the shell middens, his robes blending into the landscape. Soft focus captures the ethereal quality of this sacred site as the monk pauses before the mound, hands clasped together in reverence. The camera remains stationary, allowing the viewer to absorb the tranquility of this moment.",
+    "audio_narration": "\"For centuries, Bundala's ancient shell middens have been revered for their spiritual significance and connection to our shared human heritage.\""
+  },
+  {
+    "scene_num": 5,
+    "video_prompt": "A stunning visual showcasing an astonishing archaeological discovery \u2013 a fossilized fish skeleton trapped within one of the shell mounds. The camera captures the fossil in exquisite detail, emphasizing its rarity and importance as evidence of prehistoric diets. Vibrant colors and high contrast emphasize the striking nature of this find.",
+    "audio_narration": "\"A 125,000-year-old fish skeleton discovered here provides unique insights into the diet of early Homo sapiens.\""
+  },
+  {
+    "scene_num": 6,
+    "video_prompt": "A group of tourists from different countries walk towards one of the shell middens, their diverse cultures represented in vibrant colors and patterns on their clothing. The camera captures their excitement and curiosity as they examine the site. Soft focus emphasizes the interaction between visitors and this ancient landscape.",
+    "audio_narration": "\"Today, Bundala's ancient shell middens welcome visitors from around the world, inspiring a new generation of explorers and archaeologists.\""
+  },
+  {
+    "scene_num": 7,
+    "video_prompt": "As the sun sets over the Bundala National Park, casting a golden glow across the wetland and the shell middens, the camera pans out to reveal the vast expanse of this protected area. The stars begin to twinkle in the sky as night falls. In the distance, a lone bird is seen flying towards its nesting site.",
+    "audio_narration": "\"As we reflect on Bundala's ancient secrets, let us honor our shared responsibility to protect these treasures for future generations.\""
+  }
+]

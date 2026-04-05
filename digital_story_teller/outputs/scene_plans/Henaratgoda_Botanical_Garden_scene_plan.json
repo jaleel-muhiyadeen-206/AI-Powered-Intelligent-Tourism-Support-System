@@ -1,0 +1,32 @@
+[
+  {
+    "scene_num": 1,
+    "video_prompt": "The camera pans over lush greenery as a warm sun rises over the garden's entrance, capturing vibrant hues of emerald and turquoise. Aerial footage showcases the sprawling botanical garden's vast expanse from above. Soft morning light casts long shadows across the landscape.",
+    "audio_narration": "In the heart of Sri Lanka lies Henaratgoda Botanical Garden, cradle of the rubber industry."
+  },
+  {
+    "scene_num": 2,
+    "video_prompt": "Close-up shots of old colonial-era photographs and artifacts on display in a museum-like setting within the garden's walls. Muted sepia tones evoke nostalgia for a bygone era. The camera lingers on faded images of pioneers who introduced rubber to Asia.",
+    "audio_narration": "Established in 1876, Henaratgoda was where pioneering efforts led to the successful introduction of rubber."
+  },
+  {
+    "scene_num": 3,
+    "video_prompt": "A stunning close-up shot captures the intricate details and textures of tropical palms swaying gently in the breeze. The sun casts dappled light through their leaves, illuminating a kaleidoscope of green hues. The camera moves alongside the stems, emphasizing their majestic presence.",
+    "audio_narration": "Its vast collection of tropical palms stands as testament to its enduring legacy."
+  },
+  {
+    "scene_num": 5,
+    "video_prompt": "A mesmerizing time-lapse sequence shows visitors strolling through a serene lake's edge, surrounded by lush greenery and colorful blooms. Water lilies float gently on the surface of the lake. Soft focus captures the tranquility of the scene.",
+    "audio_narration": "Home to over 1,000 species, this haven holds secrets of colonial tropical agriculture."
+  },
+  {
+    "scene_num": 6,
+    "video_prompt": "The camera follows a visitor as they wander through the garden's pathways, admiring the unique varieties of orchids on display. Vibrant colors and intricate patterns of these flowers are highlighted by soft natural light filtering through the foliage above.",
+    "audio_narration": "Today, this haven welcomes visitors from around the world to learn its history."
+  },
+  {
+    "scene_num": 7,
+    "video_prompt": "A breathtaking establishing shot pans over the garden's serene lake at dawn, as sunrises reflect off rippling waters and lush vegetation. Soft hues of pink and orange dance across the sky. The camera lingers on the tranquil scene before fading to black.",
+    "audio_narration": "Let us cherish this legacy, safeguarding its natural beauty for generations to come."
+  }
+]

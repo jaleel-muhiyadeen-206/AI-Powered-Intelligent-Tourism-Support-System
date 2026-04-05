@@ -1,0 +1,37 @@
+[
+  {
+    "scene_num": 1,
+    "video_prompt": "Sweeping aerial shot of Sri Dalada Maligawa's majestic architecture, sunlight casting golden hues on intricate stone carvings. The camera pans over the temple's sprawling complex, revealing its tranquil gardens and reflecting pools.",
+    "audio_narration": "\"In the heart of Kandy, lies a treasure revered for centuries.\""
+  },
+  {
+    "scene_num": 2,
+    "video_prompt": "Intimate close-up of an elderly monk carefully tending to a sacred flame, surrounded by golden relics and ancient texts. Soft, warm lighting highlights the intricate details of the temple's frescoes.",
+    "audio_narration": "\"Legend has it, this sacred Tooth Relic was brought here from Anuradhapura.\""
+  },
+  {
+    "scene_num": 3,
+    "video_prompt": "Panoramic shot of the stunning Paththirippuwa (Octagonal Pavilion) built by the last King of Kandy, showcasing its imposing structure and delicate stone lacework. The sunlight catches the intricate patterns on the pavilion's exterior.",
+    "audio_narration": "\"Its beauty is a testament to Sri Lanka's rich cultural heritage.\""
+  },
+  {
+    "scene_num": 4,
+    "video_prompt": "Serene shot of devotees praying in front of the Sacred Tooth Relic, their hands clasped together in reverence as they gaze upon its golden casket. Soft light illuminates the faces of those present.",
+    "audio_narration": "\"For Buddhists worldwide, this temple is a sacred pilgrimage site.\""
+  },
+  {
+    "scene_num": 5,
+    "video_prompt": "Time-lapse footage of the Esala Perahera festival procession winding through the streets, elephants adorned with colorful regalia leading the parade as fireworks illuminate the night sky. Vibrant colors fill the frame.",
+    "audio_narration": "\"The annual Esala Perahera festival is a kaleidoscope of color and sound.\""
+  },
+  {
+    "scene_num": 6,
+    "video_prompt": "Modern-day visitors from diverse backgrounds walk side by side through the temple's grounds, taking in its beauty, with some making offerings to the sacred Tooth Relic. Soft natural light captures their reactions.",
+    "audio_narration": "\"Today, this ancient temple welcomes seekers of peace and wisdom from around the world.\""
+  },
+  {
+    "scene_num": 7,
+    "video_prompt": "Long shot of the majestic Sri Dalada Maligawa bathed in golden light at sunset, its intricate carvings and ornate details taking on an ethereal quality as the sky transforms into a kaleidoscope of colors. The camera slowly zooms out to reveal the temple's grandeur.",
+    "audio_narration": "\"Come, experience the serenity and wonder that awaits within this sacred sanctuary.\""
+  }
+]

@@ -1,0 +1,37 @@
+[
+  {
+    "scene_num": 1,
+    "video_prompt": "Aerial shot of the Sri Bhakta Hanuman Temple amidst lush green hills and misty valleys. The camera pans over the temple's intricate architecture, capturing its grandeur from above. Soft morning light bathes the scene, casting a warm glow on the structures.",
+    "audio_narration": "\"Standing atop Ramboda's hilltop, the Sri Bhakta Hanuman Temple beckons pilgrims to reverence.\""
+  },
+  {
+    "scene_num": 2,
+    "video_prompt": "A medium shot of the temple's entrance, with intricate carvings and colorful motifs adorning its facade. The camera lingers on a series of etched stones recounting Hanuman's epic quest for Sita. Gentle sunlight illuminates the scene from above.",
+    "audio_narration": "\"Built by the Chinmaya Mission to honor Hanuman's search for Sita, this temple embodies devotion.\""
+  },
+  {
+    "scene_num": 3,
+    "video_prompt": "A close-up shot of the 16-foot granite statue of Lord Hanuman, its towering presence dominating the frame. The camera captures the intricate details on the statue's face and attire, showcasing the artist's skillful craftsmanship. Soft focus emphasizes the figure's majestic scale.",
+    "audio_narration": "\"A behemoth of a monument stands within \u2013 a towering tribute to faith.\""
+  },
+  {
+    "scene_num": 4,
+    "video_prompt": "A serene shot of devotees gathered around the meditation halls, offering prayers and candles. The camera captures the tranquility as gentle chanting fills the air, resonating with the peaceful atmosphere. Soft candlelight glows softly in the background.",
+    "audio_narration": "\"This sacred sanctuary echoes prayers from all corners of the globe.\""
+  },
+  {
+    "scene_num": 5,
+    "video_prompt": "A thrilling aerial shot capturing the temple's dramatic location overlooking the Kotmale Reservoir, a glimmering expanse below. The camera weaves through the hills and valleys as the reservoir stretches towards the horizon, evoking awe in the viewer. Vibrant colors of dawn envelop the scene.",
+    "audio_narration": "\"Perched above the majestic Kotmale Reservoir, this temple unfurls an unparalleled vista.\""
+  },
+  {
+    "scene_num": 6,
+    "video_prompt": "A candid shot of smiling pilgrims and locals gathered at the temple's base, some carrying baskets filled with offerings. The camera captures vibrant colors and sounds of lively chanting as the atmosphere bursts with joyful energy. Soft focus emphasizes human warmth.",
+    "audio_narration": "\"Devotees from far and wide converge here, carrying hope and devotion in their hearts.\""
+  },
+  {
+    "scene_num": 7,
+    "video_prompt": "A breathtaking sunset shot showcasing the temple's golden-hued fa\u00e7ade glistening against a fiery sky. The camera lingers on this poignant moment as vibrant hues blend harmoniously with the natural surroundings. Warm light envelops the scene, casting an inspiring glow.",
+    "audio_narration": "\"As day yields to twilight, Sri Bhakta Hanuman Temple stands as a beacon of devotion, radiating love and peace.\""
+  }
+]

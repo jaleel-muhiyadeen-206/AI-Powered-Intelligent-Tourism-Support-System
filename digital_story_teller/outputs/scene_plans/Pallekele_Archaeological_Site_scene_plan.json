@@ -1,0 +1,37 @@
+[
+  {
+    "scene_num": 1,
+    "video_prompt": "Aerial shot of lush greenery surrounding ancient ruins, sun-kissed stones glisten with dew. Camera pans over sprawling landscape to reveal intricate details in faded frescoes. Morning light casts long shadows across worn stonework. The camera swoops down, revealing majestic proportions. As the aerial view morphs into a ground-level perspective, stone carvings become visible.",
+    "audio_narration": "\"In Sri Lanka's verdant heart, ancient secrets slumber beneath the whispering winds.\""
+  },
+  {
+    "scene_num": 2,
+    "video_prompt": "Time-lapse sequence of crumbling stones and overgrown vegetation slowly giving way to reveal faint outlines of a medieval palace complex. Camera lingers on intricately carved stone lintels, weathered to perfection by centuries of relentless rain. Muted colors evoke an atmosphere of abandonment and decay.",
+    "audio_narration": "\"The remains of Gampola's grandeur stand as testament to the rise and fall of hill country kingdoms.\""
+  },
+  {
+    "scene_num": 3,
+    "video_prompt": "Close-up footage of exquisitely crafted stone inscriptions, adorned with delicate motifs that dance across weathered surfaces. Camera movement simulates a gentle breeze rustling leaves, emphasizing the fragility of these ancient relics. As the camera pans out, the imposing bulk of an ancient stupa becomes visible in the distance.",
+    "audio_narration": "\"Intricate stone carvings whisper tales of a bygone era's power and influence.\""
+  },
+  {
+    "scene_num": 4,
+    "video_prompt": "Soft focus captures the hushed reverence with which visitors approach ancient stupas and monastic ruins. Camera pans out to reveal lush greenery enveloping these sacred spaces, creating an aura of serenity. Warm light bathing the scene imbues it with spiritual significance.",
+    "audio_narration": "\"Pallekele's mystical allure invites visitors to step into the heartbeat of Sri Lanka's storied past.\""
+  },
+  {
+    "scene_num": 5,
+    "video_prompt": "High-speed footage of archaeologists excavating ancient pottery shards and coins, expertly revealing fragments of a long-lost world. Camera movement mirrors the excitement of discovery as the team uncovers remnants from various dynasties' reigns. The visuals are intercut with archival images of Gampola's palace complex in its heyday.",
+    "audio_narration": "\"Uncovering hidden treasures at Pallekele Archaeological Site rewrites history, casting new light on ancient civilizations.\""
+  },
+  {
+    "scene_num": 6,
+    "video_prompt": "Vibrant colors capture the energy of modern-day visitors exploring the site, their footsteps echoing through tranquil corridors. Camera movement simulates a leisurely stroll as families and friends wander hand-in-hand, lost in conversation. The atmosphere is one of joyous discovery.",
+    "audio_narration": "\"Today's explorers find Pallekele an unforgettable journey back to the dawn of Sri Lanka's grandeur.\""
+  },
+  {
+    "scene_num": 7,
+    "video_prompt": "Panoramic shot of a serene landscape bathed in golden twilight, as sun sets behind ancient structures casting long shadows across rolling hills. The camera glides effortlessly over the tranquil scene before coming to rest on a majestic stupa, glowing softly against the fading light.",
+    "audio_narration": "\"In Pallekele's sacred heart, where past and present converge, lies an eternal testament to human ingenuity and the beauty of timelessness.\""
+  }
+]

@@ -1,0 +1,37 @@
+[
+  {
+    "scene_num": 1,
+    "video_prompt": "Aerial drone shot of the majestic library building, surrounded by lush greenery, with golden sunlight casting a warm glow on its neo-Mughal architecture. The camera pans down to reveal the vibrant colors and intricate details of the fa\u00e7ade.",
+    "audio_narration": "\"In Jaffna's heart, a beacon of knowledge stands tall, a testament to the North's enduring spirit.\""
+  },
+  {
+    "scene_num": 2,
+    "video_prompt": "A series of old photographs and newsreel footage from the library's opening in 1933, with soft focus and grainy texture, set against a rich brown background.",
+    "audio_narration": "\"Founded in 1933, this esteemed institution flourished, boasting over 97,000 volumes and rare palm-leaf manuscripts.\""
+  },
+  {
+    "scene_num": 3,
+    "video_prompt": "Close-up shot of the intricate wood carvings on the library's door, with precise focus on the delicate patterns and ornate details. The camera lingers on a specific carving that resembles a blooming flower.",
+    "audio_narration": "\"Its beautiful neo-Mughal architecture, a blend of Indian and Sri Lankan influences, showcases craftsmanship.\""
+  },
+  {
+    "scene_num": 4,
+    "video_prompt": "A hushed interior shot of patrons engaged in studious activities, surrounded by rows of shelves containing ancient tomes and manuscripts. Soft light casts long shadows on the floor.",
+    "audio_narration": "\"This sacred space honors the pursuit of knowledge, a sanctuary for scholars and seekers.\""
+  },
+  {
+    "scene_num": 5,
+    "video_prompt": "A dramatic, sweeping reveal of the library's interior, showcasing its restored grandeur after the devastating fire in 1981. The camera pans up to the high ceiling, where golden details shine like stars in the night sky.",
+    "audio_narration": "\"Yet, in 1981, a tragic fire ravaged this very building, leaving scars that still linger.\""
+  },
+  {
+    "scene_num": 6,
+    "video_prompt": "A modern-day visitor is shown walking through the library's peaceful corridors, surrounded by students and researchers engaged in lively discussions and focused studying. The camera lingers on a group of children enthusiastically exploring the shelves.",
+    "audio_narration": "\"Today, it stands as a symbol of resilience, welcoming visitors from around the world to explore its treasures.\""
+  },
+  {
+    "scene_num": 7,
+    "video_prompt": "A serene aerial shot at dusk, with the library building bathed in warm golden light, reflecting off the nearby water. The camera pans out further, revealing the surrounding landscape and the cityscape beyond.",
+    "audio_narration": "\"As the sun sets on Jaffna's public library, it inspires us to cherish knowledge and peace.\""
+  }
+]

@@ -1,0 +1,37 @@
+[
+  {
+    "scene_num": 1,
+    "video_prompt": "A breathtaking aerial shot of Adam's Peak at sunrise, with warm golden light illuminating the misty landscape from a low angle, capturing the majestic conical shape and lush greenery in vibrant colors.",
+    "audio_narration": "\"Welcome to Sri Lanka, where faith and nature converge at the revered Adam's Peak.\""
+  },
+  {
+    "scene_num": 2,
+    "video_prompt": "A gentle close-up of an ancient stone inscription, with soft natural light casting a warm glow on the intricate carvings, as the camera pans out to reveal the surrounding mountainside.",
+    "audio_narration": "\"For centuries, pilgrims have flocked to this sacred site, drawn by its spiritual significance.\""
+  },
+  {
+    "scene_num": 3,
+    "video_prompt": "A dramatic shot of the Sri Pada (Sacred Footprint) at the summit, with a low-angle camera capturing the intricate carvings and ornate details in sharp focus, amidst a soft misty veil.",
+    "audio_narration": "\"At 2,243 meters high, the Sri Pada is an awe-inspiring symbol of spiritual devotion.\""
+  },
+  {
+    "scene_num": 4,
+    "video_prompt": "A serene shot of monks and devotees praying at the summit, with warm sunlight casting long shadows across the landscape, as the camera pans out to reveal the stunning vistas.",
+    "audio_narration": "\"Here, four major religions come together in harmony, united by their reverence for this sacred site.\""
+  },
+  {
+    "scene_num": 5,
+    "video_prompt": "An exhilarating time-lapse shot of climbers ascending the mountain at dawn, with a fast-paced montage capturing the vibrant colors and breathtaking scenery as the sun rises over the peaks.",
+    "audio_narration": "\"From Ibn Battuta to Marco Polo, countless travelers have sought out Adam's Peak for its natural beauty.\""
+  },
+  {
+    "scene_num": 6,
+    "video_prompt": "A heartwarming shot of visitors from diverse backgrounds walking together along the mountain trails, with a warm, golden light illuminating their faces and the lush green surroundings.",
+    "audio_narration": "\"Today, pilgrims from around the world come to experience the magic of Adam's Peak for themselves.\""
+  },
+  {
+    "scene_num": 7,
+    "video_prompt": "A sublime closing shot of the sunset over Adam's Peak, with soft pinks and oranges dancing across the sky, as the camera pans out to reveal the tranquil landscape and the distant mountainside.",
+    "audio_narration": "\"As the sun sets on Adam's Peak, remember the power of unity and wonder that awaits you in this sacred place.\""
+  }
+]

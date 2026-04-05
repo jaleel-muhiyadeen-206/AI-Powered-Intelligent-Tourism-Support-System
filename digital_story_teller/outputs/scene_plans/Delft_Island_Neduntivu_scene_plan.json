@@ -1,0 +1,37 @@
+[
+  {
+    "scene_num": 1,
+    "video_prompt": "Aerial drone shot over a turquoise sea, capturing Delft Island's vast expanse as morning sunlight casts a warm glow on its coral-stone walls, while camera pans from left to right, revealing the island's flat plains.",
+    "audio_narration": "\"In the heart of the Palk Strait lies Delft Island, a treasure trove of colonial history and natural wonders.\""
+  },
+  {
+    "scene_num": 2,
+    "video_prompt": "A historical illustration of the Portuguese arriving at Delft Island on horseback is projected onto the screen, accompanied by gentle swaying palm trees in the background and a soft focus effect.",
+    "audio_narration": "\"The Portuguese brought wild ponies to Delft Island, which were later bred by the Dutch for their lucrative trade.\""
+  },
+  {
+    "scene_num": 3,
+    "video_prompt": "Close-up footage of the Dutch fort's ruins, showcasing intricate coral-stone carvings, worn by time and weather, with a shallow depth of field emphasizing texture.",
+    "audio_narration": "\"The Dutch fort on Delft Island stands as a testament to the island's strategic importance in maritime trade.\""
+  },
+  {
+    "scene_num": 4,
+    "video_prompt": "A serene shot of a local worshipper at the Growing Stone, a coral rock revered as a sacred cobra head, with a soft focus effect and warm lighting.",
+    "audio_narration": "\"For locals, the Growing Stone is a sacred site, imbued with spiritual significance and reverence.\""
+  },
+  {
+    "scene_num": 5,
+    "video_prompt": "Time-lapse footage of a giant baobab tree growing from seedling to mature tree, set against a vibrant blue sky with a subtle motion blur effect.",
+    "audio_narration": "\"A majestic baobab tree, planted by Arab merchants in the 7th century, now towers over Delft Island.\""
+  },
+  {
+    "scene_num": 6,
+    "video_prompt": "A modern-day visitor stands before the coral-stone dovecoat, looking up at its intricate carvings, with a shallow depth of field emphasizing texture and a slight smile on their face.",
+    "audio_narration": "\"Today, visitors from around the world come to Delft Island to experience its unique blend of history and natural beauty.\""
+  },
+  {
+    "scene_num": 7,
+    "video_prompt": "A breathtaking aerial shot of Delft Island at sunset, with vibrant orange hues casting long shadows across the coral-stone walls, as camera pans up towards the sky.",
+    "audio_narration": "\"As the sun sets on Delft Island, we are reminded of its enduring legacy and the importance of preserving our shared cultural heritage.\""
+  }
+]
