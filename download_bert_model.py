@@ -25,6 +25,7 @@ def main() -> None:
         print("Usage: export HF_TOKEN=your_token && python download_bert_model.py")
         return
 
+    # Assure physical paths are ready
     os.makedirs(LOCAL_DIR, exist_ok=True)
     os.makedirs(CACHE_DIR, exist_ok=True)
 
