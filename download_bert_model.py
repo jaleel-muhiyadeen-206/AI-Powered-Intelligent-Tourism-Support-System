@@ -17,7 +17,7 @@ LOCAL_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models', '
 CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models', 'bert_cache')
 
 
-def main():
+def main() -> None:
     hf_token = os.environ.get("HF_TOKEN", "")
     if not hf_token:
         print("HF_TOKEN environment variable not set.")
