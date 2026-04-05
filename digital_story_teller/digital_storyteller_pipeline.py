@@ -61,18 +61,24 @@ log = logging.getLogger(__name__)
 # =============================================================================
 #  CONFIGURATION  -- Edit these before running
 # =============================================================================
-GEMINI_API_KEY   = "AIzaSyDVQDqxIpP-pldmVXkmiISaMi_HeIVuXkc"   # <-- Replace with your key
+GEMINI_API_KEY   = ""   # <-- Replace with your key
 VEO_MODEL        = "veo-3.1-fast-generate-preview"
 OLLAMA_MODEL     = "llama3.1"
-CSV_PATH         = "sri_lanka_landmarks_final.csv"
-IMG_INPUT_DIR    = "reference_images"          # Your reference image folders
 
-# Pipeline output directories
-EDA_DIR          = "outputs/eda_report"
-CLEAN_DIR        = "outputs/cleaned_references"
-PLAN_DIR         = "outputs/scene_plans"
-CLIPS_DIR        = "outputs/raw_clips"
-FINAL_DIR        = "outputs/final_videos"
+# ── All paths resolved relative to THIS file's directory ──────────────────────
+# This ensures the pipeline works correctly whether called from app.py (parent)
+# or run directly from the digital_story_teller/ folder.
+_PIPELINE_DIR    = os.path.dirname(os.path.abspath(__file__))
+
+CSV_PATH         = os.path.join(_PIPELINE_DIR, "sri_lanka_landmarks_final.csv")
+IMG_INPUT_DIR    = os.path.join(_PIPELINE_DIR, "reference_images")
+
+# Pipeline output directories (all inside digital_story_teller/outputs/)
+EDA_DIR          = os.path.join(_PIPELINE_DIR, "outputs", "eda_report")
+CLEAN_DIR        = os.path.join(_PIPELINE_DIR, "outputs", "cleaned_references")
+PLAN_DIR         = os.path.join(_PIPELINE_DIR, "outputs", "scene_plans")
+CLIPS_DIR        = os.path.join(_PIPELINE_DIR, "outputs", "raw_clips")
+FINAL_DIR        = os.path.join(_PIPELINE_DIR, "outputs", "final_videos")
 
 # Video settings
 SCENES_PER_DOC   = 7          # 7 x 8s = 56s documentary
@@ -386,17 +392,19 @@ KEY FACTS:
 {facts_block}
 
 OUTPUT FORMAT (strict -- exactly 7 lines, pipe-delimited):
-Scene 1 | Video: [cinematic visual description] | Audio: [spoken narration, 20-25 words]
-Scene 2 | Video: [cinematic visual description] | Audio: [spoken narration, 20-25 words]
-Scene 3 | Video: [cinematic visual description] | Audio: [spoken narration, 20-25 words]
-Scene 4 | Video: [cinematic visual description] | Audio: [spoken narration, 20-25 words]
-Scene 5 | Video: [cinematic visual description] | Audio: [spoken narration, 20-25 words]
-Scene 6 | Video: [cinematic visual description] | Audio: [spoken narration, 20-25 words]
-Scene 7 | Video: [cinematic visual description] | Audio: [spoken narration, 20-25 words]
+Scene 1 | Video: [cinematic visual description] | Audio: [spoken narration, EXACTLY 16 words]
+Scene 2 | Video: [cinematic visual description] | Audio: [spoken narration, EXACTLY 16 words]
+Scene 3 | Video: [cinematic visual description] | Audio: [spoken narration, EXACTLY 16 words]
+Scene 4 | Video: [cinematic visual description] | Audio: [spoken narration, EXACTLY 16 words]
+Scene 5 | Video: [cinematic visual description] | Audio: [spoken narration, EXACTLY 16 words]
+Scene 6 | Video: [cinematic visual description] | Audio: [spoken narration, EXACTLY 16 words]
+Scene 7 | Video: [cinematic visual description] | Audio: [spoken narration, EXACTLY 16 words]
 
 RULES:
 - Each Video prompt must be a rich paragraph describing colours, camera angle, lighting
-- Each Audio must be complete evocative narration (no ellipsis, no placeholders)
+- Each Audio narration MUST be EXACTLY 16 words — count carefully before writing
+- Each Audio must be a complete, evocative sentence (no ellipsis, no placeholders)
+- CRITICAL: Count every word. 16 words exactly. Not 15, not 17. Exactly 16.
 - Output ONLY the 7 scene lines, nothing else
 """
 
@@ -847,6 +855,5 @@ def run_pipeline_all():
 if __name__ == "__main__":
     # Single landmark mode (recommended for testing)
     # Change to any landmark name from the CSV
-    TARGET_LANDMARK = "Sigiriya"
+    TARGET_LANDMARK = "Bundala Ancient Shell Middens"
     run_pipeline(TARGET_LANDMARK)
-
