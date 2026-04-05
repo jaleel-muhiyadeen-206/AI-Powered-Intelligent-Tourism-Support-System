@@ -108,7 +108,7 @@ def _haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return R * 2 * atan2(sqrt(a), sqrt(1 - a))
 
 
-def _is_local_model_ready(local_dir):
+def _is_local_model_ready(local_dir: str) -> bool:
     if not os.path.isdir(local_dir):
         return False
     required = ['config.json', 'tokenizer_config.json']
