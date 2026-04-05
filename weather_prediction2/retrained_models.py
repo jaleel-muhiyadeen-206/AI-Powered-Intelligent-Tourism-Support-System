@@ -7,7 +7,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 
 # Load data
-df = pd.read_csv('weather_prediction2\weather_data_lightweight_smart_with_landmarks.csv',
+df = pd.read_csv('weather_data_lightweight_smart_with_landmarks.csv',
                  usecols=['time', 'name', 'station_lat', 'station_lng',
                           'temperature_2m_max', 'temperature_2m_min',
                           'temperature_2m_mean', 'apparent_temperature_mean',
@@ -93,11 +93,11 @@ for target in targets:
         callbacks=[lgb.early_stopping(50), lgb.log_evaluation(100)]
     )
 
-    save_path = f'weather_prediction2/lightgbm_model_{target}.txt'
+    save_path = f'lightgbm_model_{target}.txt'
     model.save_model(save_path)
     print(f"  Saved → {save_path}")
 
 # Save feature columns list
-joblib.dump(feature_cols, 'weather_prediction2/feature_columns.pkl')
+joblib.dump(feature_cols, 'feature_columns.pkl')
 print(f"Saved feature_columns.pkl")
 print("Done! All models retrained and saved.")

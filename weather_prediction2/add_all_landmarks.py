@@ -14,7 +14,7 @@ Output: weather_data_lightweight_smart_with_landmarks.csv
 import numpy as np
 import pandas as pd
 
-INPUT_CSV  = "weather_prediction2/weather_data_lightweight_smart.csv"
+INPUT_CSV  = "weather_data_lightweight_smart.csv"
 OUTPUT_CSV = "weather_data_lightweight_smart_with_landmarks.csv"
 
 # ============================================================================
