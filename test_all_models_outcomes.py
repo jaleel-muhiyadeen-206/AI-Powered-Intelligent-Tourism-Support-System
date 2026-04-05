@@ -11,7 +11,7 @@ from models.model_2_popular_nearby import Model2_PopularNearby
 from models.model_3_nearby_essentials import Model3_NearbyEssentials
 
 
-def print_recs(title: str, df):
+def print_recs(title: str, df) -> None:
     print(f"\n  {title}")
     print("  " + "-" * 70)
     if df.empty:
