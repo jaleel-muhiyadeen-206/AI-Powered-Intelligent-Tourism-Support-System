@@ -18,6 +18,7 @@ CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models', '
 
 
 def main() -> None:
+    """Entry point for downloading the BERT sentiment model."""
     hf_token = os.environ.get("HF_TOKEN", "")
     if not hf_token:
         print("HF_TOKEN environment variable not set.")
