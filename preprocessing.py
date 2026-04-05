@@ -288,6 +288,7 @@ class KaggleReviewEnricher:
 
 
 class BERTReviewSelector:
+    """Calculates peak narrative representations utilizing sequence tensors."""
     """Selects the most positive and informative review using BERT sentiment scoring."""
 
     def __init__(self, sentiment_analyser):
