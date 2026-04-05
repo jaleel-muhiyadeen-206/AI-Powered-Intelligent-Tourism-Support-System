@@ -540,6 +540,7 @@ if __name__ == "__main__":
     sub1, sub2, acc = load_and_preprocess_all('data')
 
     out_dir = os.path.join('output', 'preprocessed')  # Persistent data lake artifacts
+    # Ensure resilient artifact topology
     os.makedirs(out_dir, exist_ok=True)
 
     joblib.dump(sub1, os.path.join(out_dir, 'submodel_1.joblib'), compress=3)
