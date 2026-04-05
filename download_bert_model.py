@@ -31,7 +31,7 @@ def main() -> None:
     os.makedirs(LOCAL_DIR, exist_ok=True)
     os.makedirs(CACHE_DIR, exist_ok=True)
 
-    print(f"Downloading {MODEL_NAME}...")
+    print(f"[STATUS] Downloading {MODEL_NAME}...")
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, cache_dir=CACHE_DIR, token=hf_token)
     model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME, cache_dir=CACHE_DIR, token=hf_token)
 
